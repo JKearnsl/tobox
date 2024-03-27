@@ -16,7 +16,15 @@ struct AppState {
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
-    let config = config::Config::new().unwrap();
+
+    let config = match config::Config::new("config.yaml") {
+        Ok(config) => config,
+        Err(error) => {
+            log::error!("{}", error);
+            return Err(std::io::Error::new(std::io::ErrorKind::Other, error));
+        },
+
+    };
     let host = config.host.clone();
     let port = config.port.clone();
 

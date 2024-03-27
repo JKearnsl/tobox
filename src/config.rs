@@ -1,14 +1,15 @@
-use std::fs::File;
+use std::fs::{File, OpenOptions};
 use std::io::Read;
-use serde::Deserialize;
+use std::io::Write;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "lowercase")]
 pub enum DistributeMode {
     Single,
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Config {
     pub host: String,
     pub port: u16,
@@ -17,8 +18,28 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn new() -> Result<Config, String> {
-        let mut file = match File::open("config.yaml") {
+    pub fn new(config_path: &str) -> Result<Config, String> {
+
+        if !std::path::Path::new(config_path).exists() {
+            let default_config = Config {
+                host: "127.0.0.1".to_string(),
+                port: 8080,
+                mode: DistributeMode::Single,
+                storages: vec![],
+            };
+            let file = OpenOptions::new().write(true).create_new(true).open(config_path);
+            match file {
+                Ok(mut file) => {
+                    if let Err(error) = writeln!(file, "{}", serde_yaml::to_string(&default_config).unwrap()) {
+                        return Err(format!("Failed to write to config.yaml -> {}", error));
+                    }
+                },
+                Err(error) => return Err(format!("Failed to create config.yaml -> {}", error)),
+            };
+        }
+
+
+        let mut file = match File::open(config_path) {
             Ok(file) => file,
             Err(error) => return Err(format!("Failed to open config.yaml -> {}", error)),
         };

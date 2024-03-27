@@ -1,0 +1,15 @@
+[package]
+name = "tobox"
+version = "0.1.0"
+authors = ["JKearnsl <pooolg@hotmail.com>"]
+edition = "2021"
+include = ["/src"]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+actix-web = "4.5.1"
+env_logger = "0.11.3"
+serde = { version = "1.0.1", features = ["derive"] }
+serde_yaml = "0.9.33"
+log = "0.4.21"

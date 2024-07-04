@@ -1,20 +1,23 @@
 use std::fs::{File, OpenOptions};
 use std::io::Read;
 use std::io::Write;
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
-#[serde(rename_all = "lowercase")]
-pub enum DistributeMode {
-    Single,
+pub struct Tls {
+    pub cert: String,
+    pub key: String,
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Config {
     pub host: String,
     pub port: u16,
-    pub mode: DistributeMode,
-    pub storages: Vec<String>,
+    pub workers: Option<usize>,
+    pub is_intermediate: bool,
+    pub log_level: Option<String>,
+    pub tls: Option<Tls>,
 }
 
 impl Config {
@@ -24,11 +27,13 @@ impl Config {
             let default_config = Config {
                 host: "127.0.0.1".to_string(),
                 port: 8080,
-                mode: DistributeMode::Single,
-                storages: vec![],
+                workers: Some(4),
+                is_intermediate: false,
+                log_level: Some("info".to_string()),
+                tls: None,
             };
-            let file = OpenOptions::new().write(true).create_new(true).open(config_path);
-            match file {
+
+            match OpenOptions::new().write(true).create_new(true).open(config_path) {
                 Ok(mut file) => {
                     if let Err(error) = writeln!(file, "{}", serde_yaml::to_string(&default_config).unwrap()) {
                         return Err(format!("Failed to write to config.yaml -> {}", error));

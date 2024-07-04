@@ -17,14 +17,11 @@ struct AppState {
 async fn main() -> std::io::Result<()> {
     env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
 
-    let config = match config::Config::new("config.yaml") {
-        Ok(config) => config,
-        Err(error) => {
-            log::error!("{}", error);
-            return Err(std::io::Error::new(std::io::ErrorKind::Other, error));
-        },
+    let config = config::Config::new("config.yaml").map_err(|error| {
+        log::error!("{}", error);
+        std::process::exit(1);
+    })?;
 
-    };
     let host = config.host.clone();
     let port = config.port.clone();
 

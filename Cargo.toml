@@ -4,6 +4,10 @@ version = "0.1.0"
 authors = ["JKearnsl <pooolg@hotmail.com>"]
 edition = "2021"
 
+[[bin]]
+name = "tobox"
+path = "src/tobox/main.rs"
+
 
 [dependencies]
 tokio = { version = "^1.38", features = [

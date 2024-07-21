@@ -23,13 +23,9 @@
     /* Path  */
     "baseUrl": "./panel",
     "paths": {
-      "@/*": [
-        "./src/panel/*"
-      ]
+      "@/*": ["./src/panel/*"]
     }
   },
-  "include": [
-    "src"
-  ],
-  "references": [{ "path": "./tsconfig.node.json"}]
+  "include": ["src"],
+  "references": [{ "path": "./tsconfig.node.json" }]
 }

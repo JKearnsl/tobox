@@ -12,6 +12,9 @@ config.yaml
 .ai
 
 # Panel section
+web/
+node_modules
+package-lock.json
 
 # Logs
 logs
@@ -22,9 +25,6 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
 *.local
 
 # Editor directories and files

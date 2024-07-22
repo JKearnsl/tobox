@@ -15,7 +15,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      "/src/panel": path.resolve(__dirname, "./src/panel"),
+      "@": path.resolve(__dirname, "./src/panel"),
     },
   },
 });

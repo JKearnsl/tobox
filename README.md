@@ -11,3 +11,12 @@
 `tobox` is a secure, high-performance, fault-tolerant decentralized object file storage written entirely in Rust.
 
 The API is similar to [amazon s3](https://docs.aws.amazon.com/AmazonS3/latest/API/Welcome.html) but aims to be simpler.
+
+## Todo
+
+This is a young repository. Work plan:
+- [ ] Node basic storage
+- [ ] Node distributed system
+- [ ] Node protection against interruption of some servers
+- [ ] Node checking files based on the first byte pattern
+- [ ] Panel

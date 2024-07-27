@@ -1,6 +1,8 @@
 use strum_macros::{Display, EnumIter};
 use crate::domain::models::r#box::BoxId;
 
+pub type PermissionTextId = String;
+
 #[derive(Display, EnumIter)]
 pub enum Permission {
     GetUserSelf,

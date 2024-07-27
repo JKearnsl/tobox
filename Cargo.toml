@@ -43,3 +43,4 @@ sqlx = { version = "^0.7", features = [
     "sqlx-sqlite",
     "chrono"
 ] }
+regex = "1.10.5"

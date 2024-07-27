@@ -28,21 +28,27 @@ fn main() -> std::io::Result<()> {
             .init();
     }
     
-    thread::scope(|s| {
+    thread::scope(|scope| {
         if let Some(panel_config) = &config.panel {
             let mut server = PanelServer::new();
             if let Some(tls) = &panel_config.tls {
                 server = server.set_tls(&tls.key, &tls.cert);
             }
-            server = server.bind(format!("{}:{}", panel_config.host, panel_config.port)).map_err(
-                |error| {
-                    log::error!("Failed to bind to {}:{}", panel_config.host, panel_config.port);
-                    error
+            server = match server.bind(format!("{}:{}", panel_config.host, panel_config.port)) {
+                Ok(server) => server,
+                Err(error) => {
+                    log::error!(
+                        "[Panel] Failed to bind to {}:{}: {}", 
+                        panel_config.host, 
+                        panel_config.port,
+                        error
+                    );
+                    std::process::exit(1);
                 }
-            ).unwrap();
+            };
             server = server.set_workers(1);
 
-            s.spawn(move || {
+            scope.spawn(move || {
                 server.run().unwrap();
             });
         }
@@ -55,12 +61,18 @@ fn main() -> std::io::Result<()> {
             if let Some(tls) = &node_config.tls {
                 server = server.set_tls(&tls.key, &tls.cert);
             }
-            server = server.bind(format!("{}:{}", node_config.host, node_config.port)).map_err(
-                |error| {
-                    log::error!("Failed to bind to {}:{}", node_config.host, node_config.port);
-                    error
+            server = match server.bind(format!("{}:{}", node_config.host, node_config.port)) {
+                Ok(server) => server,
+                Err(error) => {
+                    log::error!(
+                        "[Node] Failed to bind to {}:{}: {}", 
+                        node_config.host, 
+                        node_config.port,
+                        error
+                    );
+                    std::process::exit(1);
                 }
-            ).unwrap();
+            };
             server = server.set_workers(node_config.workers.unwrap_or_else(|| {
                 match thread::available_parallelism() {
                     Ok(parallelism) => usize::from(parallelism),
@@ -68,7 +80,7 @@ fn main() -> std::io::Result<()> {
                 }
             }));
 
-            s.spawn(move || {
+            scope.spawn(move || {
                 server.run().unwrap();
             });
         }

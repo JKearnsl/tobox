@@ -1,6 +1,6 @@
 [package]
 name = "tobox"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["JKearnsl <pooolg@hotmail.com>"]
 edition = "2021"
 
@@ -43,3 +43,4 @@ sqlx = { version = "^0.7", features = [
     "sqlx-sqlite",
     "chrono"
 ] }
+regex = "1.10.5"

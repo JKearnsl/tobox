@@ -5,5 +5,5 @@ pub mod role;
 pub mod initial;
 pub mod permission;
 pub mod r#box;
-pub mod file;
+pub mod object;
 pub mod sync;

@@ -1,3 +1,1 @@
-
-pub mod server;
-mod routes;
+pub mod routes;

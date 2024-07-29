@@ -66,6 +66,117 @@ impl AccessService {
         Err(DomainError::AccessDenied)
     }
     
+    pub fn ensure_can_update_box(
+        &self,
+        is_auth: &bool,
+        box_id: &BoxId,
+        permissions: &Vec<String>
+    ) -> Result<(), DomainError> {
+        
+        if !is_auth {
+            return Err(DomainError::AuthorizationRequired)
+        }
+        
+        if permissions.contains(&NodePermission::UpdateSpecificBox(*box_id).to_string()) {
+            return Ok(())
+        }
+        
+        if permissions.contains(&NodePermission::UpdateBox.to_string()) {
+            return Ok(())
+        }
+        
+        Err(DomainError::AccessDenied)
+    }
+    
+    pub fn ensure_can_create_object(
+        &self,
+        is_auth: &bool,
+        box_id: &BoxId,
+        permissions: &Vec<String>
+    ) -> Result<(), DomainError> {
+        
+        if !is_auth {
+            return Err(DomainError::AuthorizationRequired)
+        }
+        
+        if permissions.contains(&NodePermission::CreateSpecificObject(*box_id).to_string()) {
+            return Ok(())
+        }
+        
+        if permissions.contains(&NodePermission::CreateObject.to_string()) {
+            return Ok(())
+        }
+        
+        Err(DomainError::AccessDenied)
+    }
+    
+    pub fn ensure_can_get_object(
+        &self,
+        is_auth: &bool,
+        box_id: &BoxId,
+        permissions: &Vec<String>
+    ) -> Result<(), DomainError> {
+        
+        if !is_auth {
+            return Err(DomainError::AuthorizationRequired)
+        }
+        
+        if permissions.contains(&NodePermission::GetSpecificObject(*box_id).to_string()) {
+            return Ok(())
+        }
+        
+        if permissions.contains(&NodePermission::GetObject.to_string()) {
+            return Ok(())
+        }
+        
+        Err(DomainError::AccessDenied)
+    }
+    
+    pub fn ensure_can_delete_object(
+        &self,
+        is_auth: &bool,
+        box_id: &BoxId,
+        permissions: &Vec<String>
+    ) -> Result<(), DomainError> {
+        
+        if !is_auth {
+            return Err(DomainError::AuthorizationRequired)
+        }
+        
+        if permissions.contains(&NodePermission::DeleteSpecificObject(*box_id).to_string()) {
+            return Ok(())
+        }
+        
+        if permissions.contains(&NodePermission::DeleteObject.to_string()) {
+            return Ok(())
+        }
+        
+        Err(DomainError::AccessDenied)
+    }
+    
+    
+    pub fn ensure_can_update_object(
+        &self,
+        is_auth: &bool,
+        box_id: &BoxId,
+        permissions: &Vec<String>
+    ) -> Result<(), DomainError> {
+        
+        if !is_auth {
+            return Err(DomainError::AuthorizationRequired)
+        }
+        
+        if permissions.contains(&NodePermission::UpdateSpecificObject(*box_id).to_string()) {
+            return Ok(())
+        }
+        
+        if permissions.contains(&NodePermission::UpdateObject.to_string()) {
+            return Ok(())
+        }
+        
+        Err(DomainError::AccessDenied)
+    }
+    
     pub fn ensure_can_get_user_self(
         &self,
         is_auth: &bool,

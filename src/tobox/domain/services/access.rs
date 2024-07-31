@@ -1,25 +1,182 @@
 use uuid::Uuid;
 
 use crate::domain::exceptions::DomainError;
-use crate::domain::models::permission::PermissionTextId;
+use crate::domain::models::permission::{NodePermission, PermissionTextId};
+use crate::domain::models::r#box::BoxId;
 use crate::domain::models::session::SessionId;
-use crate::domain::models::ums_permission::UMSPermission;
 use crate::domain::models::user::UserState;
 
 pub struct AccessService {}
 
 impl AccessService {
     
-    pub fn ensure_can_create_user(
+    pub fn ensure_can_create_box(
         &self,
+        is_auth: &bool,
         permissions: &Vec<String>
     ) -> Result<(), DomainError> {
-        if !permissions.contains(&UMSPermission::CreateUser.to_string()) {
-            return Err(DomainError::AccessDenied)
+        
+        if !is_auth {
+            return Err(DomainError::AuthorizationRequired)
         }
-        Ok(())
+        
+        if permissions.contains(&NodePermission::CreateBox.to_string()) {
+            return Ok(())
+        }
+        
+        Err(DomainError::AccessDenied)
     }
-
+    
+    pub fn ensure_can_get_box(
+        &self,
+        is_auth: &bool,
+        permissions: &Vec<String>
+    ) -> Result<(), DomainError> {
+        
+        if !is_auth {
+            return Err(DomainError::AuthorizationRequired)
+        }
+        
+        if permissions.contains(&NodePermission::GetBox.to_string()) {
+            return Ok(())
+        }
+        
+        Err(DomainError::AccessDenied)
+    }
+    
+    pub fn ensure_can_delete_box(
+        &self,
+        is_auth: &bool,
+        box_id: &BoxId,
+        permissions: &Vec<String>
+    ) -> Result<(), DomainError> {
+        
+        if !is_auth {
+            return Err(DomainError::AuthorizationRequired)
+        }
+        
+        if permissions.contains(&NodePermission::DeleteSpecificBox(*box_id).to_string()) {
+            return Ok(())
+        }
+        
+        if permissions.contains(&NodePermission::DeleteBox.to_string()) {
+            return Ok(())
+        }
+        
+        Err(DomainError::AccessDenied)
+    }
+    
+    pub fn ensure_can_update_box(
+        &self,
+        is_auth: &bool,
+        box_id: &BoxId,
+        permissions: &Vec<String>
+    ) -> Result<(), DomainError> {
+        
+        if !is_auth {
+            return Err(DomainError::AuthorizationRequired)
+        }
+        
+        if permissions.contains(&NodePermission::UpdateSpecificBox(*box_id).to_string()) {
+            return Ok(())
+        }
+        
+        if permissions.contains(&NodePermission::UpdateBox.to_string()) {
+            return Ok(())
+        }
+        
+        Err(DomainError::AccessDenied)
+    }
+    
+    pub fn ensure_can_create_object(
+        &self,
+        is_auth: &bool,
+        box_id: &BoxId,
+        permissions: &Vec<String>
+    ) -> Result<(), DomainError> {
+        
+        if !is_auth {
+            return Err(DomainError::AuthorizationRequired)
+        }
+        
+        if permissions.contains(&NodePermission::CreateSpecificObject(*box_id).to_string()) {
+            return Ok(())
+        }
+        
+        if permissions.contains(&NodePermission::CreateObject.to_string()) {
+            return Ok(())
+        }
+        
+        Err(DomainError::AccessDenied)
+    }
+    
+    pub fn ensure_can_get_object(
+        &self,
+        is_auth: &bool,
+        box_id: &BoxId,
+        permissions: &Vec<String>
+    ) -> Result<(), DomainError> {
+        
+        if !is_auth {
+            return Err(DomainError::AuthorizationRequired)
+        }
+        
+        if permissions.contains(&NodePermission::GetSpecificObject(*box_id).to_string()) {
+            return Ok(())
+        }
+        
+        if permissions.contains(&NodePermission::GetObject.to_string()) {
+            return Ok(())
+        }
+        
+        Err(DomainError::AccessDenied)
+    }
+    
+    pub fn ensure_can_delete_object(
+        &self,
+        is_auth: &bool,
+        box_id: &BoxId,
+        permissions: &Vec<String>
+    ) -> Result<(), DomainError> {
+        
+        if !is_auth {
+            return Err(DomainError::AuthorizationRequired)
+        }
+        
+        if permissions.contains(&NodePermission::DeleteSpecificObject(*box_id).to_string()) {
+            return Ok(())
+        }
+        
+        if permissions.contains(&NodePermission::DeleteObject.to_string()) {
+            return Ok(())
+        }
+        
+        Err(DomainError::AccessDenied)
+    }
+    
+    
+    pub fn ensure_can_update_object(
+        &self,
+        is_auth: &bool,
+        box_id: &BoxId,
+        permissions: &Vec<String>
+    ) -> Result<(), DomainError> {
+        
+        if !is_auth {
+            return Err(DomainError::AuthorizationRequired)
+        }
+        
+        if permissions.contains(&NodePermission::UpdateSpecificObject(*box_id).to_string()) {
+            return Ok(())
+        }
+        
+        if permissions.contains(&NodePermission::UpdateObject.to_string()) {
+            return Ok(())
+        }
+        
+        Err(DomainError::AccessDenied)
+    }
+    
     pub fn ensure_can_get_user_self(
         &self,
         is_auth: &bool,
@@ -549,40 +706,6 @@ impl AccessService {
         }
 
         if permissions.contains(&UMSPermission::LinkRolePermission.to_string()) {
-            return Ok(())
-        }
-
-        Err(DomainError::AccessDenied)
-    }
-
-    pub fn ensure_can_get_service(
-        &self,
-        is_auth: &bool,
-        permissions: &Vec<String>
-    ) -> Result<(), DomainError> {
-
-        if !is_auth {
-            return Err(DomainError::AuthorizationRequired)
-        }
-
-        if permissions.contains(&UMSPermission::GetService.to_string()) {
-            return Ok(())
-        }
-
-        Err(DomainError::AccessDenied)
-    }
-
-    pub fn ensure_can_update_service(
-        &self,
-        is_auth: &bool,
-        permissions: &Vec<String>
-    ) -> Result<(), DomainError> {
-
-        if !is_auth {
-            return Err(DomainError::AuthorizationRequired)
-        }
-
-        if permissions.contains(&UMSPermission::UpdateService.to_string()) {
             return Ok(())
         }
 

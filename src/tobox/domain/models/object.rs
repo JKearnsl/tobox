@@ -8,8 +8,8 @@ pub type ObjectId = Uuid;
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Object {
     pub id: ObjectId,
-    pub name: String,
-    pub path: String,
+    pub name: Option<String>,
+    pub path: Option<String>,
     pub hash: String,
     pub size: u64,
     pub content_type: String,

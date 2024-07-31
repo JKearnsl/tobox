@@ -10,3 +10,6 @@ pub mod exceptions;
 pub mod hasher;
 pub mod access_log_gateway;
 pub mod server;
+pub mod box_gateway;
+pub mod object_gateway;
+pub mod file_storage_manager;

@@ -2,7 +2,7 @@ use std::fs::File;
 use std::io;
 use std::io::BufReader;
 use std::net::TcpListener;
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, Mutex, RwLock};
 use std::time::Duration;
 
 use actix_web::{App, HttpServer as ActixHttpServer, web};
@@ -10,6 +10,7 @@ use actix_web::http::KeepAlive;
 use actix_web::middleware::Logger;
 
 use crate::application::common::server::{ConnectionConfig, Server};
+use crate::config::ConfigManager;
 use crate::domain::models::service::ServiceTextId;
 use crate::ioc::IoC;
 use crate::presentation;
@@ -19,18 +20,21 @@ use crate::presentation::node::interactor_factory::InteractorFactory;
 pub struct NodeServer {
     connection_config: Arc<Mutex<ConnectionConfig>>,
     version: &'static str,
-    is_intermediate: bool
+    is_intermediate: bool,
+    config_manager: ConfigManager
 }
 
 impl NodeServer {
     pub fn new(
         version: &'static str,
-        is_intermediate: bool
+        is_intermediate: bool,
+        config_manager: ConfigManager
     ) -> Self {
         Self {
             connection_config: Arc::new(Mutex::new(ConnectionConfig::default())),
             version,
-            is_intermediate
+            is_intermediate,
+            config_manager
         }
     }
 }
@@ -108,14 +112,14 @@ impl Server for NodeServer {
 
                 let mut key_file = BufReader::new(File::open(tls.0).map_err(
                     |error| {
-                        log::error!("Failed to open key file: {}", error.to_string());
+                        log::error!("Failed to open key object: {}", error.to_string());
                         std::process::exit(1);
                     }
                 ).unwrap());
 
                 let mut certs_file = BufReader::new(File::open(tls.1).map_err(
                     |error| {
-                        log::error!("Failed to open certificate file: {}", error.to_string());
+                        log::error!("Failed to open certificate object: {}", error.to_string());
                         std::process::exit(1);
                     }
                 ).unwrap());

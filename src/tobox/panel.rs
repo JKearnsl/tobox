@@ -78,14 +78,14 @@ impl Server for PanelServer {
 
                 let mut key_file = BufReader::new(File::open(tls.0).map_err(
                     |error| {
-                        log::error!("Failed to open key file: {}", error.to_string());
+                        log::error!("Failed to open key object: {}", error.to_string());
                         std::process::exit(1);
                     }
                 ).unwrap());
                 
                 let mut certs_file = BufReader::new(File::open(tls.1).map_err(
                     |error| {
-                        log::error!("Failed to open certificate file: {}", error.to_string());
+                        log::error!("Failed to open certificate object: {}", error.to_string());
                         std::process::exit(1);
                     }
                 ).unwrap());

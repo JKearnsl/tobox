@@ -8,10 +8,10 @@ pub struct ObjectService { }
 
 impl ObjectService {
 
-    pub fn create_box(
+    pub fn create_object(
         &self, 
-        name: String,
-        path: String,
+        name: Option<String>,
+        path: Option<String>,
         hash: String,
         size: u64,
         content_type: String,
@@ -30,11 +30,11 @@ impl ObjectService {
         }
     }
 
-    pub fn update_box(
+    pub fn update_object(
         &self,
         object: Object,
-        new_name: String,
-        new_path: String,
+        new_name: Option<String>,
+        new_path: Option<String>,
         new_metadata: HashMap<String, String>,
     ) -> Object {
         Object {

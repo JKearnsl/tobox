@@ -10,12 +10,14 @@ path = "src/tobox/main.rs"
 
 
 [dependencies]
-tokio = { version = "^1.38", features = [
+tokio = { version = "^1.39", features = [
     "rt",
     "rt-multi-thread",
     "macros"
 ] }
+tokio-stream = "^0.1"
 actix-web = {  version = "^4.8", features = ["rustls-0_23"] }
+actix-multipart = "^0.7"
 rustls = "^0.23"
 rustls-pemfile = "^2.1"
 log = "^0.4"
@@ -37,10 +39,10 @@ strum_macros = "^0.26"
 sha2 = "^0.10"
 
 # Database
-sqlx = { version = "^0.7", features = [
+sqlx = { version = "^0.8", features = [
     "runtime-tokio",
     "sqlite",
     "sqlx-sqlite",
     "chrono"
 ] }
-regex = "1.10.5"
+regex = "^1.10"

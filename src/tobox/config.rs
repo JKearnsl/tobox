@@ -96,7 +96,9 @@ pub struct ConfigManager {
 }
 
 impl ConfigManager {
-    pub fn new(config_path: &str) -> Self {
+    pub fn from_file<T: Into<String>>(config_path: T) -> Self {
+        let config_path = &config_path.into();
+        
         if !std::path::Path::new(config_path).exists() {
             match OpenOptions::new().write(true).create_new(true).open(config_path) {
                 Ok(mut file) => {

@@ -2,34 +2,28 @@ use std::str::FromStr;
 use std::thread;
 
 use crate::application::common::server::Server;
-use crate::presentation::node::server::NodeServer;
-use crate::presentation::panel::server::PanelServer;
+use node::NodeServer;
+use panel::PanelServer;
 
 mod domain;
 mod config;
 mod presentation;
 mod application;
-// mod adapters;
+pub mod node;
+pub mod panel;
+mod adapters;
 
 
 fn main() -> std::io::Result<()> {
-    let config = match config::Config::new("config.yaml") {
-        Ok(config) => config,
-        Err(error) => {
-            env_logger::builder().filter_level(log::LevelFilter::Error).init();
-            log::error!("Failed to load config: {}", error);
-            std::process::exit(1);
-        },
-    };
-
-    if let Some(log_level) = &config.log_level {
+    let config = config::ConfigManager::from_file("config.yaml");
+    if let Some(log_level) = &config.get().log_level {
         env_logger::builder()
             .filter_level(log::LevelFilter::from_str(log_level).unwrap())
             .init();
     }
     
     thread::scope(|scope| {
-        if let Some(panel_config) = &config.panel {
+        if let Some(panel_config) = &config.get().panel {
             let mut server = PanelServer::new();
             if let Some(tls) = &panel_config.tls {
                 server = server.set_tls(&tls.key, &tls.cert);
@@ -53,10 +47,11 @@ fn main() -> std::io::Result<()> {
             });
         }
 
-        if let Some(node_config) = &config.node {
+        if let Some(node_config) = &config.get().node {
             let mut server = NodeServer::new(
                 env!("CARGO_PKG_VERSION"),
-                node_config.is_intermediate
+                node_config.is_intermediate,
+                config
             );
             if let Some(tls) = &node_config.tls {
                 server = server.set_tls(&tls.key, &tls.cert);

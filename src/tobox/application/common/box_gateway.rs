@@ -15,4 +15,9 @@ pub trait BoxWriter {
     async fn save_box(&self, data: &BoxDomain);
 }
 
-pub trait BoxGateway: BoxReader + BoxWriter {}
+#[async_trait]
+pub trait BoxRemover {
+    async fn remove_box(&self, box_id: &BoxId);
+}
+
+pub trait BoxGateway: BoxReader + BoxWriter + BoxRemover {}

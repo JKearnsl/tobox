@@ -12,6 +12,7 @@ use crate::application::common::object_gateway::ObjectGateway;
 use crate::domain::exceptions::DomainError;
 use crate::domain::models::file_stream::FileStream;
 use crate::domain::models::object::ObjectId;
+use crate::domain::models::r#box::BoxId;
 use crate::domain::services::access::AccessService;
 use crate::domain::services::object::ObjectService;
 use crate::domain::services::validator::ValidatorService;
@@ -34,6 +35,7 @@ pub struct CreateObjectResultDTO{
     pub size: u64,
     pub content_type: String,
     pub metadata: HashMap<String, String>,
+    pub box_id: BoxId,
     pub created_at: DateTime<Utc>,
     pub updated_at: Option<DateTime<Utc>>
 }
@@ -119,6 +121,7 @@ impl Interactor<CreateObjectDTO, CreateObjectResultDTO> for CreateObject<'_> {
             0,
             "".to_string(),
             data.metadata,
+            r#box.id
         );
 
         let file_hash = self.file_storage_writer.save_file(
@@ -140,6 +143,7 @@ impl Interactor<CreateObjectDTO, CreateObjectResultDTO> for CreateObject<'_> {
             size: object.size,
             content_type: object.content_type,
             metadata: object.metadata,
+            box_id: object.box_id,
             created_at: object.created_at,
             updated_at: None,
         })

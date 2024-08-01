@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 use chrono::Utc;
-use uuid::Uuid;
 
-use crate::domain::models::object::Object;
+use crate::domain::models::object::{Object, ObjectId};
+use crate::domain::models::r#box::BoxId;
 
 pub struct ObjectService { }
 
@@ -16,15 +16,17 @@ impl ObjectService {
         size: u64,
         content_type: String,
         metadata: HashMap<String, String>,
+        box_id: BoxId
     ) -> Object {
         Object {
-            id: Uuid::new_v4(),
+            id: ObjectId::new_v4(),
             name,
             path,
             hash,
             size,
             content_type,
             metadata,
+            box_id,
             created_at: Utc::now(),
             updated_at: None,
         }

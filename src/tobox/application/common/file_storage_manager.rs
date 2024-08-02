@@ -1,4 +1,5 @@
 use async_trait::async_trait;
+use crate::domain::models::file_info::FileInfo;
 use crate::domain::models::file_stream::FileStream;
 
 #[async_trait]
@@ -23,13 +24,15 @@ pub trait FileStorageWriter {
     /// 
     /// Content-type, filesize and hash are calculated during file upload, it justifies the 
     /// existence of this function
-    async fn save_file<T: Into<String>>(
+    async fn save_file<F: Into<String>, CT: Into<String>>(
         &self, 
-        filename: &T,
-        content_type: Option<&T>,
+        filename: &F,
+        content_type: Option<&CT>,
         size_range: Option<(u64, u64)>,
         bytes: &dyn FileStream
-    ) -> String;
+    ) -> FileInfo;
+    
+    async fn rename_file<T: Into<String>, U: Into<String>>(&self, filename: &T, new_filename: &U);
 }
 
 #[async_trait]

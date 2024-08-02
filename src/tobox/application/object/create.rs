@@ -71,7 +71,9 @@ impl Interactor<CreateObjectDTO, CreateObjectResultDTO> for CreateObject<'_> {
             });
         }
         
-        // todo: validate metadata
+        self.validator.validate_object_metadata(&data.metadata).unwrap_or_else(|e| {
+            validator_err_map.insert("metadata".to_string(), e.to_string());
+        });
         
         if !validator_err_map.is_empty() {
             return Err(
@@ -114,21 +116,29 @@ impl Interactor<CreateObjectDTO, CreateObjectResultDTO> for CreateObject<'_> {
             }
         };
         
-        let object = self.object_service.create_object(
-            data.name,
-            data.path,
-            "".to_string(),
-            0,
-            "".to_string(),
-            data.metadata,
-            r#box.id
-        );
+        let object_id = ObjectId::new_v4();
 
-        let file_hash = self.file_storage_writer.save_file(
-            object.id,
+        let file_info = self.file_storage_writer.save_file(
+            &object_id,
             None,
             None,
             data.file
+        ).await;
+        
+        let object = self.object_service.create_object(
+            object_id,
+            data.name,
+            data.path,
+            file_info.hash,
+            file_info.size,
+            file_info.content_type,
+            data.metadata,
+            r#box.id
+        );
+        
+        self.file_storage_writer.rename_file(
+            &object.id,
+            &object.hash
         ).await;
 
         self.object_gateway.save_object(&object).await;
@@ -137,8 +147,8 @@ impl Interactor<CreateObjectDTO, CreateObjectResultDTO> for CreateObject<'_> {
 
         Ok(CreateObjectResultDTO {
             id: object.id,
-            name: object.name,
-            path: object.path,
+            name: object.name.unwrap_or(object.id.to_string()),
+            path: object.path.unwrap_or("/".to_string()),
             hash: object.hash,
             size: object.size,
             content_type: object.content_type,

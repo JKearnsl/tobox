@@ -10,6 +10,7 @@ impl ObjectService {
 
     pub fn create_object(
         &self, 
+        id: ObjectId,
         name: Option<String>,
         path: Option<String>,
         hash: String,
@@ -19,7 +20,7 @@ impl ObjectService {
         box_id: BoxId
     ) -> Object {
         Object {
-            id: ObjectId::new_v4(),
+            id,
             name,
             path,
             hash,

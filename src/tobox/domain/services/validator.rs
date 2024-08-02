@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 
 pub struct ValidatorService {
     box_name_max_length: usize,
@@ -11,6 +12,9 @@ pub struct ValidatorService {
     object_path_max_length: usize,
     object_path_min_length: usize,
     object_path_regex: regex::Regex,
+    
+    metadata_key_max_length: usize,
+    metadata_value_max_length: usize,
     
     username_max_length: usize,
     username_min_length: usize,
@@ -46,6 +50,10 @@ impl ValidatorService {
         let object_path_min_length = 1;
         let object_path_regex = regex::Regex::new(r"^(/[^/\x00]+)+/?$").unwrap();
         
+        // Object metadata
+        let metadata_key_max_length = 64;
+        let metadata_value_max_length = 256;
+        
         // Username
         let username_max_length = 32;
         let username_min_length = 4;
@@ -73,6 +81,8 @@ impl ValidatorService {
             object_path_max_length,
             object_path_min_length,
             object_path_regex,
+            metadata_key_max_length,
+            metadata_value_max_length,
             username_max_length,
             username_min_length,
             username_regex,
@@ -162,6 +172,24 @@ impl ValidatorService {
             return Err("Object path should be a valid unix path".to_string());
         }
 
+        Ok(())
+    }
+    
+    pub fn validate_object_metadata(&self, metadata: &HashMap<String, String>) -> Result<(), String> {
+        for (key, value) in metadata.iter() {
+            if key.len() > self.metadata_key_max_length {
+                return Err(format!(
+                    "Metadata key should be less than {} characters",
+                    self.metadata_key_max_length
+                ));
+            }
+            if value.len() > self.metadata_value_max_length {
+                return Err(format!(
+                    "Metadata value should be less than {} characters",
+                    self.metadata_value_max_length
+                ));
+            }
+        }
         Ok(())
     }
 

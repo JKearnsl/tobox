@@ -8,6 +8,10 @@ pub struct ValidatorService {
     object_name_min_length: usize,
     object_name_regex: regex::Regex,
     
+    object_path_max_length: usize,
+    object_path_min_length: usize,
+    object_path_regex: regex::Regex,
+    
     username_max_length: usize,
     username_min_length: usize,
     username_regex: regex::Regex,
@@ -35,8 +39,13 @@ impl ValidatorService {
         // Object name
         let object_name_max_length = 256;
         let object_name_min_length = 1;
-        let object_name_regex = regex::Regex::new(r"^[a-zA-Zа-яА-Я0-9.]*$").unwrap();  // todo:  ^[\w\s-]+\.[A-Za-z]{3}$
-
+        let object_name_regex = regex::Regex::new(r"^[^/]+$").unwrap();
+        
+        // Object path
+        let object_path_max_length = 256;
+        let object_path_min_length = 1;
+        let object_path_regex = regex::Regex::new(r"^(/[^/\x00]+)+/?$").unwrap();
+        
         // Username
         let username_max_length = 32;
         let username_min_length = 4;
@@ -61,6 +70,9 @@ impl ValidatorService {
             object_name_max_length,
             object_name_min_length,
             object_name_regex,
+            object_path_max_length,
+            object_path_min_length,
+            object_path_regex,
             username_max_length,
             username_min_length,
             username_regex,
@@ -131,7 +143,23 @@ impl ValidatorService {
         }
 
         if !self.object_name_regex.is_match(last_name) {
-            return Err("Object name should contain only letters, numbers and dots".to_string());
+            return Err("Object name should not contain slashes".to_string());
+        }
+
+        Ok(())
+    }
+    
+    pub fn validate_object_path(&self, path: &str) -> Result<(), String> {
+        if path.len() > self.object_path_max_length || path.len() < self.object_path_min_length {
+            return Err(format!(
+                "Object path should be between {} and {} characters",
+                self.object_path_min_length, 
+                self.object_path_max_length
+            ));
+        }
+
+        if !self.object_path_regex.is_match(path) {
+            return Err("Object path should be a valid unix path".to_string());
         }
 
         Ok(())

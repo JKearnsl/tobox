@@ -38,11 +38,13 @@ impl Interactor<RoleId, ()> for SetDefaultRole<'_> {
         
         self.role_gateway.get_role(&data).await.ok_or(
             ApplicationError::InvalidData(
-                ErrorContent::Message("Указанная роль не существует".to_string())
+                ErrorContent::Message("Role not found".to_string())
             )
         )?;
         
         self.role_gateway.set_default_role(&data).await;
+
+        // todo: sync with other services
         
         Ok(())
     }

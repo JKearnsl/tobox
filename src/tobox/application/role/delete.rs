@@ -44,11 +44,13 @@ impl Interactor<DeleteRoleDTO, ()> for DeleteRole<'_> {
         
         self.role_gateway.get_role(&data.id).await.ok_or_else(|| {
             ApplicationError::NotFound(
-                ErrorContent::Message("Роль не найдена".to_string())
+                ErrorContent::Message("Role not found".to_string())
             )
         })?;
 
         self.role_gateway.remove_role(&data.id).await;
+        
+        // todo: sync with other services
         
         Ok(())
     }

@@ -61,7 +61,9 @@ impl Interactor<GetRolesByIdsDTO, RolesByIdsResultDTO> for GetRolesByIds<'_> {
             Some(roles) => roles,
             None => return Err(
                 ApplicationError::InvalidData(
-                    ErrorContent::Message("Запрашиваемые роли не найдены".to_string())
+                    ErrorContent::Message(
+                        "Not all of the specified roles have been found".to_string()
+                    )
                 )
             )
         };

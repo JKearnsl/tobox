@@ -85,7 +85,7 @@ impl Interactor<RoleRangeDTO, RoleRangeResultDTO> for GetRoleRange<'_> {
         
         Ok(
             roles.iter().map(|role| RoleItemResult{
-                id: role.id,
+                id: role.id.clone(),
                 title: role.title.clone(),
                 description: role.description.clone(),
                 created_at: role.created_at,

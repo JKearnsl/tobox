@@ -6,19 +6,15 @@ use crate::application::common::interactor::Interactor;
 use crate::application::common::permission_gateway::PermissionReader;
 use crate::application::common::role_gateway::RoleReader;
 use crate::domain::exceptions::DomainError;
-use crate::domain::models::permission::{PermissionId, PermissionTextId};
+use crate::domain::models::permission::{PermissionId, PermissionTag};
 use crate::domain::models::role::RoleId;
-use crate::domain::models::service::ServiceId;
 use crate::domain::services::access::AccessService;
 
 
 #[derive(Debug, Serialize)]
 pub struct PermissionItem {
     pub id: PermissionId,
-    pub text_id: PermissionTextId,
-    pub service_id: ServiceId,
-    pub title: String,
-    pub description: Option<String>
+    pub tag: PermissionTag,
 }
 
 
@@ -65,7 +61,7 @@ impl Interactor<(), GetDefaultRoleResult> for GetDefaultRole<'_> {
         
         let role = self.role_reader.get_default_role().await.ok_or(
             ApplicationError::NotFound(
-                ErrorContent::Message("Роль ещё не установлена".to_string())
+                ErrorContent::Message("The default role has not been set yet".to_string())
             )
         )?;
         
@@ -77,11 +73,8 @@ impl Interactor<(), GetDefaultRoleResult> for GetDefaultRole<'_> {
                 title: role.title,
                 description: role.description,
                 permissions: permissions.iter().map(|permission| PermissionItem {
-                    id: permission.id,
-                    text_id: permission.text_id.clone(),
-                    service_id: permission.service_id,
-                    title: permission.title.clone(),
-                    description: permission.description.clone()
+                    id: permission.id.clone(),
+                    tag: permission.tag.clone()
                 }).collect(),
                 created_at: role.created_at,
                 updated_at: role.updated_at

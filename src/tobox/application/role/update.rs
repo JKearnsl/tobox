@@ -2,7 +2,6 @@ use std::collections::HashMap;
 
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use uuid::Uuid;
 
 use crate::application::common::exceptions::{ApplicationError, ErrorContent};
 use crate::application::common::id_provider::IdProvider;
@@ -23,7 +22,7 @@ pub struct UpdateRoleDTO {
 
 #[derive(Debug, Serialize)]
 pub struct RoleResultDTO{
-    id: Uuid,
+    id: RoleId,
     title: String,
     description: Option<String>,
     created_at: DateTime<Utc>,
@@ -87,15 +86,19 @@ impl Interactor<UpdateRoleDTO, RoleResultDTO> for UpdateRole<'_> {
             Some(role) => role,
             None => return Err(
                 ApplicationError::InvalidData(
-                    ErrorContent::Message("Роль не найдена".to_string())
+                    ErrorContent::Message("Role not found".to_string())
                 )
             )
         };
 
+        // Tobox does not allow the creation of roles with the same names. 
+        // However, if due to a synchronization error, two roles with the same name appear, 
+        // it does allow this. This was done to reduce the number of conflicts and
+        // further operations to resolve them.
         self.role_gateway.get_role_by_title_not_sensitive(&data.title).await.ok_or_else(
             || ApplicationError::InvalidData(
                 ErrorContent::Map(
-                    [("title".to_string(), "Роль с таким названием уже существует".to_string())]
+                    [("title".to_string(), "Role with this title already exists".to_string())]
                     .iter().cloned().collect()
                 )
             )
@@ -115,6 +118,8 @@ impl Interactor<UpdateRoleDTO, RoleResultDTO> for UpdateRole<'_> {
         };
         
         self.role_gateway.save_role(&new_role).await;
+        
+        // todo: sync with other services
         
         Ok(RoleResultDTO{
             id: new_role.id,

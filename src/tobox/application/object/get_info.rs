@@ -67,8 +67,8 @@ impl Interactor<GetObjectInfoDTO, GetObjectInfoResultDTO> for GetObjectInfo<'_> 
         };
         
         Ok(GetObjectInfoResultDTO {
-            id: object.id,
-            name: object.name.unwrap_or(object.id.to_string()),
+            id: object.id.clone(),
+            name: object.name.unwrap_or(object.id.clone()),
             hash: object.hash,
             size: object.size,
             content_type: object.content_type,

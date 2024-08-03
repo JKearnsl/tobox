@@ -1,17 +1,15 @@
 use strum_macros::Display;
-use uuid::Uuid;
 use crate::domain::models::r#box::BoxId;
 
-pub type PermissionId = Uuid;
-pub type PermissionTextId = String;
+pub type PermissionId = String;
 
 pub struct Permission {
     pub id: PermissionId,
-    pub text_id: PermissionTextId,
+    pub tag: PermissionTag,
 }
 
-#[derive(Display)]
-pub enum NodePermission {
+#[derive(Display, Debug)]
+pub enum PermissionTag {
     GetUserSelf,
     GetUser,
     CreateUser,

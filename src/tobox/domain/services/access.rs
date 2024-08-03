@@ -1,7 +1,7 @@
 use uuid::Uuid;
 
 use crate::domain::exceptions::DomainError;
-use crate::domain::models::permission::{NodePermission, PermissionTextId};
+use crate::domain::models::permission::{NodePermission, PermissionTag, PermissionTextId};
 use crate::domain::models::r#box::BoxId;
 use crate::domain::models::session::SessionId;
 use crate::domain::models::user::UserState;
@@ -188,7 +188,7 @@ impl AccessService {
         }
         
         if 
-            permissions.contains(&UMSPermission::GetUserSelf.to_string()) &&
+            permissions.contains(&PermissionTag::GetUserSelf.to_string()) &&
             user_state.unwrap() != &UserState::Inactive
         {
             return Ok(())
@@ -205,7 +205,7 @@ impl AccessService {
         permissions: &Vec<String>
     ) -> Result<(), DomainError> {
         
-        if permissions.contains(&UMSPermission::GetUser.to_string()) {
+        if permissions.contains(&PermissionTag::GetUser.to_string()) {
             return Ok(())
         }
         
@@ -214,7 +214,7 @@ impl AccessService {
         }
         
         if 
-            permissions.contains(&UMSPermission::GetUserSelf.to_string()) &&
+            permissions.contains(&PermissionTag::GetUserSelf.to_string()) &&
             user_id.unwrap() == get_user_id &&
             user_state.unwrap() == &UserState::Active
         {
@@ -232,7 +232,7 @@ impl AccessService {
         permissions: &Vec<String>
     ) -> Result<(), DomainError> {
 
-        if permissions.contains(&UMSPermission::GetUser.to_string()) {
+        if permissions.contains(&PermissionTag::GetUser.to_string()) {
             return Ok(())
         }
 
@@ -241,7 +241,7 @@ impl AccessService {
         }
 
         if
-            permissions.contains(&UMSPermission::GetUserSelf.to_string()) && 
+            permissions.contains(&PermissionTag::GetUserSelf.to_string()) && 
             get_user_ids.len() == 1 &&
             get_user_ids.contains(&user_id.unwrap()) &&
             user_state.unwrap() == &UserState::Active
@@ -256,7 +256,7 @@ impl AccessService {
         permissions: &Vec<String>
     ) -> Result<(), DomainError> {
 
-        if permissions.contains(&UMSPermission::GetUser.to_string()) {
+        if permissions.contains(&PermissionTag::GetUser.to_string()) {
             return Ok(())
         }
         
@@ -277,7 +277,7 @@ impl AccessService {
         
         if 
             user_state.unwrap() == &UserState::Active && 
-            permissions.contains(&UMSPermission::UpdateUser.to_string())
+            permissions.contains(&PermissionTag::UpdateUser.to_string())
         {
             return Ok(())
         }
@@ -298,7 +298,7 @@ impl AccessService {
         
         if
             user_state.unwrap() == &UserState::Active &&
-            permissions.contains(&UMSPermission::UpdateUserSelf.to_string())
+            permissions.contains(&PermissionTag::UpdateUserSelf.to_string())
         {
             return Ok(())
         }
@@ -312,7 +312,7 @@ impl AccessService {
         permissions: &Vec<String>
     ) -> Result<(), DomainError> {
         
-        if *is_auth || !permissions.contains(&UMSPermission::ResetUserPassword.to_string())
+        if *is_auth || !permissions.contains(&PermissionTag::ResetUserPassword.to_string())
         {
             return Err(DomainError::AccessDenied)
         }
@@ -326,7 +326,7 @@ impl AccessService {
         is_auth: &bool,
         permissions: &Vec<PermissionTextId>
     ) -> Result<(), DomainError> {
-        if !permissions.contains(&UMSPermission::ConfirmUser.to_string()) || *is_auth {
+        if !permissions.contains(&PermissionTag::ConfirmUser.to_string()) || *is_auth {
             return Err(DomainError::AccessDenied)
         }
         Ok(())
@@ -337,7 +337,7 @@ impl AccessService {
         is_auth: &bool,
         permissions: &Vec<PermissionTextId>
     ) -> Result<(), DomainError> {
-        if !permissions.contains(&UMSPermission::SendConfirmCode.to_string()) || *is_auth {
+        if !permissions.contains(&PermissionTag::SendConfirmCode.to_string()) || *is_auth {
             return Err(DomainError::AccessDenied)
         }
         Ok(())
@@ -357,9 +357,9 @@ impl AccessService {
         }
         
         if
-            permissions.contains(&UMSPermission::DeleteSession.to_string()) ||
+            permissions.contains(&PermissionTag::DeleteSession.to_string()) ||
             (
-                permissions.contains(&UMSPermission::DeleteSessionSelf.to_string()) &&
+                permissions.contains(&PermissionTag::DeleteSessionSelf.to_string()) &&
                 user_session_id.unwrap() == del_session_id &&
                 user_state.unwrap() != &UserState::Inactive
             )
@@ -383,7 +383,7 @@ impl AccessService {
         
         if
             user_state.unwrap() != &UserState::Inactive &&
-            permissions.contains(&UMSPermission::DeleteSessionSelf.to_string())
+            permissions.contains(&PermissionTag::DeleteSessionSelf.to_string())
         {
             return Ok(())
         }
@@ -397,7 +397,7 @@ impl AccessService {
         permissions: &Vec<String>
     ) -> Result<(), DomainError> {
         
-        if !is_auth && permissions.contains(&UMSPermission::CreateSession.to_string())
+        if !is_auth && permissions.contains(&PermissionTag::CreateSession.to_string())
         {
             return Ok(())
         }
@@ -419,9 +419,9 @@ impl AccessService {
         }
         
         if
-            permissions.contains(&UMSPermission::GetSession.to_string()) ||
+            permissions.contains(&PermissionTag::GetSession.to_string()) ||
             (
-                permissions.contains(&UMSPermission::GetSessionSelf.to_string()) &&
+                permissions.contains(&PermissionTag::GetSessionSelf.to_string()) &&
                 user_session_id.unwrap() == get_session_id &&
                 user_state.unwrap() != &UserState::Inactive
             )
@@ -445,12 +445,12 @@ impl AccessService {
             return Err(DomainError::AuthorizationRequired)
         }
 
-        if permissions.contains(&UMSPermission::GetSession.to_string()) {
+        if permissions.contains(&PermissionTag::GetSession.to_string()) {
             return Ok(())
         }
         
         if
-            permissions.contains(&UMSPermission::GetSessionSelf.to_string()) &&
+            permissions.contains(&PermissionTag::GetSessionSelf.to_string()) &&
             get_user_id == user_id.unwrap() &&
             user_state.unwrap() == &UserState::Active
         {
@@ -472,7 +472,7 @@ impl AccessService {
         }
         
         if 
-            permissions.contains(&UMSPermission::GetSessionSelf.to_string()) &&
+            permissions.contains(&PermissionTag::GetSessionSelf.to_string()) &&
             user_state.unwrap() != &UserState::Inactive
         {
             return Ok(())
@@ -491,7 +491,7 @@ impl AccessService {
             return Err(DomainError::AuthorizationRequired)
         }
 
-        if permissions.contains(&UMSPermission::GetAccessLogSelf.to_string()) &&
+        if permissions.contains(&PermissionTag::GetAccessLogSelf.to_string()) &&
             user_state.unwrap() == &UserState::Active 
         {
             return Ok(())
@@ -510,7 +510,7 @@ impl AccessService {
             return Err(DomainError::AuthorizationRequired)
         }
 
-        if permissions.contains(&UMSPermission::GetAccessLog.to_string()) &&
+        if permissions.contains(&PermissionTag::GetAccessLog.to_string()) &&
             user_state.unwrap() == &UserState::Active
         {
             return Ok(())
@@ -532,7 +532,7 @@ impl AccessService {
         
         if 
             user_state.unwrap() == &UserState::Active &&
-            permissions.contains(&UMSPermission::CreateRole.to_string())
+            permissions.contains(&PermissionTag::CreateRole.to_string())
         {
             return Ok(())
         }
@@ -553,7 +553,7 @@ impl AccessService {
 
         if
         user_state.unwrap() == &UserState::Active &&
-            permissions.contains(&UMSPermission::SetDefaultRole.to_string())
+            permissions.contains(&PermissionTag::SetDefaultRole.to_string())
         {
             return Ok(())
         }
@@ -574,7 +574,7 @@ impl AccessService {
         
         if 
             user_state.unwrap() == &UserState::Active &&
-            permissions.contains(&UMSPermission::DeleteRole.to_string())
+            permissions.contains(&PermissionTag::DeleteRole.to_string())
         {
             return Ok(())
         }
@@ -595,7 +595,7 @@ impl AccessService {
         
         if 
             user_state.unwrap() == &UserState::Active &&
-            permissions.contains(&UMSPermission::GetRole.to_string())
+            permissions.contains(&PermissionTag::GetRole.to_string())
         {
             return Ok(())
         }
@@ -616,7 +616,7 @@ impl AccessService {
         
         if 
             user_state.unwrap() == &UserState::Active &&
-            permissions.contains(&UMSPermission::LinkUserRole.to_string())
+            permissions.contains(&PermissionTag::LinkUserRole.to_string())
         {
             return Ok(())
         }
@@ -637,7 +637,7 @@ impl AccessService {
 
         if
         user_state.unwrap() == &UserState::Active &&
-            permissions.contains(&UMSPermission::GetUserRole.to_string())
+            permissions.contains(&PermissionTag::GetUserRole.to_string())
         {
             return Ok(())
         }
@@ -658,7 +658,7 @@ impl AccessService {
         
         if 
             user_state.unwrap() == &UserState::Active &&
-            permissions.contains(&UMSPermission::UpdateRole.to_string())
+            permissions.contains(&PermissionTag::UpdateRole.to_string())
         {
             return Ok(())
         }
@@ -671,7 +671,7 @@ impl AccessService {
         permissions: &Vec<String>
     ) -> Result<(), DomainError> {
 
-        if permissions.contains(&UMSPermission::GetPermission.to_string()) {
+        if permissions.contains(&PermissionTag::GetPermission.to_string()) {
             return Ok(())
         }
 
@@ -688,7 +688,7 @@ impl AccessService {
             return Err(DomainError::AuthorizationRequired)
         }
 
-        if permissions.contains(&UMSPermission::UpdatePermission.to_string()) {
+        if permissions.contains(&PermissionTag::UpdatePermission.to_string()) {
             return Ok(())
         }
 
@@ -705,7 +705,7 @@ impl AccessService {
             return Err(DomainError::AuthorizationRequired)
         }
 
-        if permissions.contains(&UMSPermission::LinkRolePermission.to_string()) {
+        if permissions.contains(&PermissionTag::LinkRolePermission.to_string()) {
             return Ok(())
         }
 

@@ -6,7 +6,7 @@ use crate::domain::models::user::UserId;
 #[async_trait]
 pub trait RoleReader {
     async fn get_role(&self, role_id: &RoleId) -> Option<RoleDomain>;
-    async fn get_roles_by_ids(&self, role_ids: &Vec<RoleId>) -> Option<Vec<RoleDomain>>;
+    async fn get_roles(&self, role_ids: &Vec<RoleId>) -> Option<Vec<RoleDomain>>;
     async fn get_roles_range(
         &self, 
         limit: &u64, 

@@ -9,9 +9,9 @@ mod domain;
 mod config;
 mod presentation;
 mod application;
-pub mod node;
-pub mod panel;
 mod adapters;
+mod node;
+mod panel;
 
 
 fn main() -> std::io::Result<()> {

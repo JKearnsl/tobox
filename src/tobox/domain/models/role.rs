@@ -1,8 +1,7 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use uuid::Uuid;
 
-pub type RoleId = Uuid;
+pub type RoleId = String;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Role {

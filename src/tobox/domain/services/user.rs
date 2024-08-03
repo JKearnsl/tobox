@@ -1,6 +1,5 @@
 use chrono::Utc;
-use uuid::Uuid;
-
+use crate::domain::id_generator::generate_id;
 use crate::domain::models::user::User;
 
 pub struct UserService { }
@@ -13,7 +12,7 @@ impl UserService {
         hashed_password: String,
     ) -> User {
         User {
-            id: Uuid::new_v4(),
+            id: generate_id(16),
             username,
             hashed_password,
             created_at: Utc::now(),

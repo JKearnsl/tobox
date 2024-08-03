@@ -1,12 +1,12 @@
+use std::collections::HashMap;
 
 pub struct ValidatorService {
-    box_name_max_length: usize,
-    box_name_min_length: usize,
-    box_name_regex: regex::Regex,
-    
     object_name_max_length: usize,
     object_name_min_length: usize,
     object_name_regex: regex::Regex,
+    
+    metadata_key_max_length: usize,
+    metadata_value_max_length: usize,
     
     username_max_length: usize,
     username_min_length: usize,
@@ -27,16 +27,15 @@ impl ValidatorService {
         
         // User - - - - - - - - - - - - - - - - - - - - - - - - - - -
         
-        // Box name
-        let box_name_max_length = 64;
-        let box_name_min_length = 4;
-        let box_name_regex = regex::Regex::new(r"^[a-zA-Zа-яА-Я0-9]*$").unwrap();
-
         // Object name
         let object_name_max_length = 256;
         let object_name_min_length = 1;
-        let object_name_regex = regex::Regex::new(r"^[a-zA-Zа-яА-Я0-9.]*$").unwrap();  // todo:  ^[\w\s-]+\.[A-Za-z]{3}$
-
+        let object_name_regex = regex::Regex::new(r"^[^/\\:?]+$").unwrap();
+        
+        // Object metadata
+        let metadata_key_max_length = 64;
+        let metadata_value_max_length = 256;
+        
         // Username
         let username_max_length = 32;
         let username_min_length = 4;
@@ -55,12 +54,11 @@ impl ValidatorService {
         let role_description_min_length = 4;
         
         ValidatorService {
-            box_name_max_length,
-            box_name_min_length,
-            box_name_regex,
             object_name_max_length,
             object_name_min_length,
             object_name_regex,
+            metadata_key_max_length,
+            metadata_value_max_length,
             username_max_length,
             username_min_length,
             username_regex,
@@ -131,25 +129,28 @@ impl ValidatorService {
         }
 
         if !self.object_name_regex.is_match(last_name) {
-            return Err("Object name should contain only letters, numbers and dots".to_string());
+            return Err("Object name should not contain special characters: [/, \\, :, ?]".to_string());
         }
 
         Ok(())
     }
-
-    pub fn validate_box_name(&self, first_name: &str) -> Result<(), String> {
-        if first_name.len() > self.box_name_max_length || first_name.len() < self.box_name_min_length {
-            return Err(format!(
-                "Box name should be between {} and {} characters",
-                self.box_name_min_length, 
-                self.box_name_max_length
-            ));
+    
+    
+    pub fn validate_object_metadata(&self, metadata: &HashMap<String, String>) -> Result<(), String> {
+        for (key, value) in metadata.iter() {
+            if key.len() > self.metadata_key_max_length {
+                return Err(format!(
+                    "Metadata key should be less than {} characters",
+                    self.metadata_key_max_length
+                ));
+            }
+            if value.len() > self.metadata_value_max_length {
+                return Err(format!(
+                    "Metadata value should be less than {} characters",
+                    self.metadata_value_max_length
+                ));
+            }
         }
-
-        if !self.box_name_regex.is_match(first_name) {
-            return Err("Box name should contain only letters and numbers".to_string());
-        }
-
         Ok(())
     }
     

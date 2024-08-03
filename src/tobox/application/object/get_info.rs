@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+use chrono::{DateTime, Utc};
 use serde::Deserialize;
 
 use crate::application::common::exceptions::{ApplicationError, ErrorContent};
@@ -6,25 +8,38 @@ use crate::application::common::id_provider::IdProvider;
 use crate::application::common::interactor::Interactor;
 use crate::application::common::object_gateway::ObjectReader;
 use crate::domain::exceptions::DomainError;
-use crate::domain::models::file_stream::FileStream;
 use crate::domain::models::object::ObjectId;
+use crate::domain::models::r#box::BoxId;
 use crate::domain::services::access::AccessService;
 
 #[derive(Debug, Deserialize)]
-pub struct GetObjectDTO {
+pub struct GetObjectInfoDTO {
     pub id: ObjectId
 }
 
-pub struct GetObject<'a> {
-    pub file_storage_reader: &'a dyn FileStorageReader,
+#[derive(Debug, Deserialize)]
+pub struct GetObjectInfoResultDTO {
+    pub id: ObjectId,
+    pub name: String,
+    pub hash: String,
+    pub size: u64,
+    pub content_type: String,
+    pub metadata: HashMap<String, String>,
+    pub box_id: BoxId,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: Option<DateTime<Utc>>
+}
+
+pub struct GetObjectInfo<'a> {  
     pub object_reader: &'a dyn ObjectReader,
+    pub file_storage_reader: &'a dyn FileStorageReader,
     pub access_service: &'a AccessService,
     pub id_provider: Box<dyn IdProvider>
 }
 
-impl Interactor<GetObjectDTO, dyn FileStream> for GetObject<'_> {
-    async fn execute(&self, data: GetObjectDTO) -> Result<dyn FileStream, ApplicationError> {
-        
+impl Interactor<GetObjectInfoDTO, GetObjectInfoResultDTO> for GetObjectInfo<'_> {
+    async fn execute(&self, data: GetObjectInfoDTO) -> Result<GetObjectInfoResultDTO, ApplicationError> {
+
         let object = self.object_reader.get_object(&data.id).await.ok_or(
             ApplicationError::NotFound(
                 ErrorContent::Message("Object not found".to_string())
@@ -50,7 +65,17 @@ impl Interactor<GetObjectDTO, dyn FileStream> for GetObject<'_> {
                 )
             }
         };
-
-        Ok(self.file_storage_reader.read_file(&object.hash).await)
+        
+        Ok(GetObjectInfoResultDTO {
+            id: object.id.clone(),
+            name: object.name.unwrap_or(object.id.clone()),
+            hash: object.hash,
+            size: object.size,
+            content_type: object.content_type,
+            metadata: object.metadata,
+            box_id: object.box_id,
+            created_at: object.created_at,
+            updated_at: object.updated_at
+        })
     }
 }

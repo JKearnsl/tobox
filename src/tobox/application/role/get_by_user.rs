@@ -61,7 +61,7 @@ impl Interactor<GetUserRolesDTO, UserRolesResultDTO> for GetUserRoles<'_> {
             Some(_) => (),
             None => return Err(
                 ApplicationError::InvalidData(
-                    ErrorContent::Message("Пользователь не найден".to_string())
+                    ErrorContent::Message("User not found".to_string())
                 )
             )
         };

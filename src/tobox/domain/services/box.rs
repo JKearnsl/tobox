@@ -1,24 +1,15 @@
 use chrono::Utc;
-use uuid::Uuid;
-
+use crate::domain::id_generator::generate_id;
 use crate::domain::models::r#box::Box;
 
 pub struct BoxService { }
 
 impl BoxService {
 
-    pub fn create_box(&self, name: String) -> Box {
+    pub fn create_box(&self) -> Box {
         Box {
-            id: Uuid::new_v4(),
-            name,
+            id: generate_id(16),
             created_at: Utc::now(),
-        }
-    }
-
-    pub fn update_box(&self, r#box: Box, new_name: String) -> Box {
-        Box {
-            name: new_name,
-            ..r#box
         }
     }
 }

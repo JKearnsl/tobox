@@ -57,11 +57,13 @@ impl Interactor<GetRolesByIdsDTO, RolesByIdsResultDTO> for GetRolesByIds<'_> {
             }
         };
         
-        let roles = match self.role_gateway.get_roles_by_ids(&data.ids).await {
+        let roles = match self.role_gateway.get_roles(&data.ids).await {
             Some(roles) => roles,
             None => return Err(
                 ApplicationError::InvalidData(
-                    ErrorContent::Message("Запрашиваемые роли не найдены".to_string())
+                    ErrorContent::Message(
+                        "Not all of the specified roles have been found".to_string()
+                    )
                 )
             )
         };

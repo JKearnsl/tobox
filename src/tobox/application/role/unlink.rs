@@ -50,11 +50,11 @@ impl Interactor<UnlinkRoleUserDTO, ()> for UnlinkRoleUser<'_> {
 
         let mut validator_err_map: HashMap<String, String> = HashMap::new();
         if self.role_gateway.get_role(&data.role_id).await.is_none() {
-            validator_err_map.insert("role_id".to_string(), "Роль не найдена".to_string());
+            validator_err_map.insert("role_id".to_string(), "Role not found".to_string());
         }
 
         if self.user_reader.get_user_by_id(&data.user_id).await.is_none() {
-            validator_err_map.insert("user_id".to_string(), "Пользователь не найден".to_string());
+            validator_err_map.insert("user_id".to_string(), "User not found".to_string());
         }
 
         if !validator_err_map.is_empty() {
@@ -68,12 +68,14 @@ impl Interactor<UnlinkRoleUserDTO, ()> for UnlinkRoleUser<'_> {
         if !self.role_gateway.is_role_linked_to_user(&data.role_id, &data.user_id).await {
             return Err(
                 ApplicationError::InvalidData(
-                    ErrorContent::Message("Роль не привязана к данному пользователю".to_string())
+                    ErrorContent::Message("Role is not linked to user".to_string())
                 )
             )
         }
         
         self.role_gateway.unlink_role_from_user(&data.role_id, &data.user_id).await;
+
+        // todo: sync with other services
         
         Ok(())
     }

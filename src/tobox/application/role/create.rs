@@ -8,9 +8,8 @@ use crate::application::common::interactor::Interactor;
 use crate::application::common::permission_gateway::PermissionGateway;
 use crate::application::common::role_gateway::RoleGateway;
 use crate::domain::exceptions::DomainError;
-use crate::domain::models::permission::{PermissionId, PermissionTextId};
+use crate::domain::models::permission::{PermissionId, PermissionTag};
 use crate::domain::models::role::RoleId;
-use crate::domain::models::service::ServiceId;
 use crate::domain::services::access::AccessService;
 use crate::domain::services::role::RoleService;
 use crate::domain::services::validator::ValidatorService;
@@ -25,10 +24,7 @@ pub struct CreateRoleDTO {
 #[derive(Debug, Serialize)]
 pub struct PermissionItem {
     pub id: PermissionId,
-    pub text_id: PermissionTextId,
-    pub service_id: ServiceId,
-    pub title: String,
-    pub description: Option<String>
+    pub tag: PermissionTag,
 }
 
 
@@ -78,8 +74,8 @@ impl Interactor<CreateRoleDTO, CreateRoleResultDTO> for CreateRole<'_> {
             validator_err_map.insert("title".to_string(), e.to_string());
         });
 
-        if data.description.is_some() {
-            self.validator.validate_role_description(&data.description.clone().unwrap()).unwrap_or_else(
+        if let Some(description) = data.description.clone() {
+            self.validator.validate_role_description(&description).unwrap_or_else(
                 |e| {
                     validator_err_map.insert("description".to_string(), e.to_string());
                 }
@@ -95,9 +91,16 @@ impl Interactor<CreateRoleDTO, CreateRoleResultDTO> for CreateRole<'_> {
         }
 
         let role_by_title = self.role_gateway.get_role_by_title_not_sensitive(&data.title).await;
-        
+
+        // Tobox does not allow the creation of roles with the same names. 
+        // However, if due to a synchronization error, two roles with the same name appear, 
+        // it does allow this. This was done to reduce the number of conflicts and
+        // further operations to resolve them.
         if role_by_title.is_some() {
-            validator_err_map.insert("title".to_string(), "Роль с таким названием уже существует".to_string());
+            validator_err_map.insert(
+                "title".to_string(), 
+                "Role with this title already exists".to_string()
+            );
         }
         
         if !validator_err_map.is_empty() {
@@ -108,13 +111,14 @@ impl Interactor<CreateRoleDTO, CreateRoleResultDTO> for CreateRole<'_> {
             )
         }
         
-        let permissions = match self.permission_gateway.get_permissions_by_ids(
+        let permissions = match self.permission_gateway.get_permissions(
             &data.permissions
         ).await {
             Some(permissions) => permissions,
             None => {
                 validator_err_map.insert(
-                    "permission".to_string(), "Не все указанные права были найдены".to_string()
+                    "permissions".to_string(), 
+                    "Not all of the specified permissions were found".to_string()
                 );
                 return Err(
                     ApplicationError::InvalidData(
@@ -138,17 +142,16 @@ impl Interactor<CreateRoleDTO, CreateRoleResultDTO> for CreateRole<'_> {
             ).await;
         }
         
+        // todo: sync with other services
+        
         Ok(CreateRoleResultDTO {
             id: role.id,
             title: role.title,
             description: role.description,
             permissions: permissions.iter().map(|permission| {
                 PermissionItem {
-                    id: permission.id,
-                    text_id: permission.text_id.clone(),
-                    service_id: permission.service_id.clone(),
-                    title: permission.title.clone(),
-                    description: permission.description.clone()
+                    id: permission.id.clone(),
+                    tag: permission.tag.clone()
                 }
             }).collect()
         })

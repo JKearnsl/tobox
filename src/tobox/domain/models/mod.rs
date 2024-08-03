@@ -5,3 +5,5 @@ pub mod permission;
 pub mod role;
 pub mod token_pair;
 pub mod file_stream;
+pub mod file_info;
+mod id;

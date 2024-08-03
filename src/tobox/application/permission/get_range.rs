@@ -1,6 +1,5 @@
 use std::collections::HashMap;
 
-use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
 use crate::application::common::exceptions::{ApplicationError, ErrorContent};
@@ -8,8 +7,7 @@ use crate::application::common::id_provider::IdProvider;
 use crate::application::common::interactor::Interactor;
 use crate::application::common::permission_gateway::PermissionReader;
 use crate::domain::exceptions::DomainError;
-use crate::domain::models::permission::{PermissionId, PermissionTextId};
-use crate::domain::models::service::ServiceId;
+use crate::domain::models::permission::{PermissionId, PermissionTag};
 use crate::domain::services::access::AccessService;
 use crate::domain::services::validator::ValidatorService;
 
@@ -22,18 +20,8 @@ pub struct GetPermissionRangeDTO {
 #[derive(Debug, Serialize)]
 pub struct PermissionItemResult{
     id: PermissionId,
-    text_id: PermissionTextId,
-    
-    service_id: ServiceId,
-    title: String,
-    description: Option<String>,
-    
-    created_at: DateTime<Utc>,
-    updated_at: Option<DateTime<Utc>>,
+    tag: PermissionTag,
 }
-
-pub type GetPermissionRangeResultDTO = Vec<PermissionItemResult>;
-
 
 pub struct GetPermissionRange<'a> {
     pub permission_reader: &'a dyn PermissionReader,
@@ -42,8 +30,11 @@ pub struct GetPermissionRange<'a> {
     pub validator: &'a ValidatorService,
 }
 
-impl Interactor<GetPermissionRangeDTO, GetPermissionRangeResultDTO> for GetPermissionRange<'_> {
-    async fn execute(&self, data: GetPermissionRangeDTO) -> Result<GetPermissionRangeResultDTO, ApplicationError> {
+impl Interactor<GetPermissionRangeDTO, Vec<PermissionItemResult>> for GetPermissionRange<'_> {
+    async fn execute(
+        &self, 
+        data: GetPermissionRangeDTO
+    ) -> Result<Vec<PermissionItemResult>, ApplicationError> {
         
         match self.access_service.ensure_can_get_permissions(
             &self.id_provider.permissions()
@@ -80,7 +71,7 @@ impl Interactor<GetPermissionRangeDTO, GetPermissionRangeResultDTO> for GetPermi
             )
         }
         
-        let permissions = self.permission_reader.get_permissions_list(
+        let permissions = self.permission_reader.get_permissions_range(
             &data.per_page,
             &(data.page * data.per_page)
         ).await;
@@ -88,12 +79,7 @@ impl Interactor<GetPermissionRangeDTO, GetPermissionRangeResultDTO> for GetPermi
         Ok(
             permissions.into_iter().map(|u| PermissionItemResult {
                 id: u.id,
-                text_id: u.text_id,
-                service_id: u.service_id,
-                title: u.title,
-                description: u.description,
-                created_at: u.created_at,
-                updated_at: u.updated_at
+                tag: u.tag,
             }).collect()
         )
     }

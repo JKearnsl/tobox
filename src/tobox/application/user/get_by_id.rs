@@ -53,11 +53,11 @@ impl Interactor<GetUserByIdDTO, UserByIdResultDTO> for GetUserById<'_> {
             }
         };
         
-        let user = match self.user_reader.get_user_by_id(&data.id).await {
+        let user = match self.user_reader.get_user(&data.id).await {
             Some(u) => u,
             None => return Err(
                 ApplicationError::NotFound(
-                    ErrorContent::Message("Пользователь не найден".to_string())
+                    ErrorContent::Message("User not found".to_string())
                 )
             ),
         };

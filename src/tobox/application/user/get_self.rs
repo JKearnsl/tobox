@@ -5,7 +5,7 @@ use crate::application::common::exceptions::{ApplicationError, ErrorContent};
 use crate::application::common::id_provider::IdProvider;
 use crate::application::common::interactor::Interactor;
 use crate::application::common::user_gateway::UserReader;
-use crate::domain::models::user::{UserId, UserState};
+use crate::domain::models::user::UserId;
 use crate::domain::services::access::AccessService;
 
 #[derive(Debug, Serialize)]
@@ -39,7 +39,7 @@ impl Interactor<(), UserSelfResultDTO> for GetUserSelf<'_> {
         };
         
         
-        let user = self.user_reader.get_user_by_id(self.id_provider.user_id().unwrap()).await.unwrap();
+        let user = self.user_reader.get_user(self.id_provider.user_id().unwrap()).await.unwrap();
 
         Ok(UserSelfResultDTO {
             id: user.id,

@@ -1,4 +1,4 @@
-use uuid::Uuid;
+use crate::domain::id_generator::generate_id;
 use crate::domain::models::permission::{Permission, PermissionTextId};
 
 pub struct PermissionService { }
@@ -10,7 +10,7 @@ impl PermissionService {
         text_id: PermissionTextId,
     ) -> Permission {
         Permission {
-            id: Uuid::new_v4(),
+            id: generate_id(16),
             text_id,
         }
     }

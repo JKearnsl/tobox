@@ -49,11 +49,11 @@ impl Interactor<LinkRolePermissionDTO, ()> for LinkRolePermission<'_> {
 
         let mut validator_err_map: HashMap<String, String> = HashMap::new();
         if self.role_reader.get_role(&data.role_id).await.is_none() {
-            validator_err_map.insert("role_id".to_string(), "Роль не найдена".to_string());
+            validator_err_map.insert("role_id".to_string(), "Role not found".to_string());
         }
 
-        if self.permission_gateway.get_permission_by_id(&data.permission_id).await.is_none() {
-            validator_err_map.insert("permission_id".to_string(), "Разрешение не найдено".to_string());
+        if self.permission_gateway.get_permission(&data.permission_id).await.is_none() {
+            validator_err_map.insert("permission_id".to_string(), "Permission not found".to_string());
         }
 
         if !validator_err_map.is_empty() {
@@ -67,7 +67,7 @@ impl Interactor<LinkRolePermissionDTO, ()> for LinkRolePermission<'_> {
         if self.permission_gateway.is_permission_linked_to_role(&data.role_id, &data.permission_id).await {
             return Err(
                 ApplicationError::InvalidData(
-                    ErrorContent::Message("Разрешение уже привязано к данной роли".to_string())
+                    ErrorContent::Message("Permission already linked to role".to_string())
                 )
             )
         }

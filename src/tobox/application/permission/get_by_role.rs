@@ -7,26 +7,15 @@ use crate::application::common::interactor::Interactor;
 use crate::application::common::permission_gateway::PermissionReader;
 use crate::application::common::role_gateway::RoleReader;
 use crate::domain::exceptions::DomainError;
-use crate::domain::models::permission::{PermissionId, PermissionTextId};
+use crate::domain::models::permission::{PermissionId, PermissionTag};
 use crate::domain::models::role::RoleId;
-use crate::domain::models::service::ServiceId;
 use crate::domain::services::access::AccessService;
 
 #[derive(Debug, Serialize)]
 pub struct PermissionItemResult{
     id: PermissionId,
-    text_id: PermissionTextId,
-    
-    service_id: ServiceId,
-    title: String,
-    description: Option<String>,
-    
-    created_at: DateTime<Utc>,
-    updated_at: Option<DateTime<Utc>>,
+    tag: PermissionTag,
 }
-
-pub type GetRolePermissionsResultDTO = Vec<PermissionItemResult>;
-
 
 pub struct GetRolePermissions<'a> {
     pub permission_reader: &'a dyn PermissionReader,
@@ -35,8 +24,8 @@ pub struct GetRolePermissions<'a> {
     pub access_service: &'a AccessService,
 }
 
-impl Interactor<RoleId, GetRolePermissionsResultDTO> for GetRolePermissions<'_> {
-    async fn execute(&self, data: RoleId) -> Result<GetRolePermissionsResultDTO, ApplicationError> {
+impl Interactor<RoleId, Vec<PermissionItemResult>> for GetRolePermissions<'_> {
+    async fn execute(&self, data: RoleId) -> Result<Vec<PermissionItemResult>, ApplicationError> {
         
         match self.access_service.ensure_can_get_permissions(
             &self.id_provider.permissions()
@@ -60,7 +49,7 @@ impl Interactor<RoleId, GetRolePermissionsResultDTO> for GetRolePermissions<'_> 
             &data
         ).await.ok_or(
             ApplicationError::InvalidData(
-                ErrorContent::Message("Роль не найдена".to_string())
+                ErrorContent::Message("Role not found".to_string())
             )
         )?;
         
@@ -71,12 +60,7 @@ impl Interactor<RoleId, GetRolePermissionsResultDTO> for GetRolePermissions<'_> 
         Ok(
             permissions.into_iter().map(|u| PermissionItemResult {
                 id: u.id,
-                text_id: u.text_id,
-                service_id: u.service_id,
-                title: u.title,
-                description: u.description,
-                created_at: u.created_at,
-                updated_at: u.updated_at
+                tag: u.tag,
             }).collect()
         )
     }

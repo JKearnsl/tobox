@@ -72,7 +72,7 @@ impl Interactor<GetUserRangeDTO, GetUserRangeResultDTO> for GetUserRange<'_> {
             )
         }
         
-        let users = self.user_reader.get_users_list(
+        let users = self.user_reader.get_users_range(
             &data.per_page,
             &(data.page * data.per_page)
         ).await;

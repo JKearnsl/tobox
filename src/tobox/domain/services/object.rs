@@ -12,7 +12,6 @@ impl ObjectService {
         &self, 
         id: ObjectId,
         name: Option<String>,
-        path: Option<String>,
         hash: String,
         size: u64,
         content_type: String,
@@ -22,7 +21,6 @@ impl ObjectService {
         Object {
             id,
             name,
-            path,
             hash,
             size,
             content_type,
@@ -37,12 +35,10 @@ impl ObjectService {
         &self,
         object: Object,
         new_name: Option<String>,
-        new_path: Option<String>,
         new_metadata: HashMap<String, String>,
     ) -> Object {
         Object {
             name: new_name,
-            path: new_path,
             metadata: new_metadata,
             updated_at: Some(Utc::now()),
             ..object

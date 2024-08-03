@@ -21,7 +21,6 @@ use crate::domain::services::validator::ValidatorService;
 pub struct CreateObjectDTO {
     pub box_name: String,
     pub name: Option<String>,
-    pub path: Option<String>,
     pub file: dyn FileStream,
     pub metadata: HashMap<String, String>
 }
@@ -30,7 +29,6 @@ pub struct CreateObjectDTO {
 pub struct CreateObjectResultDTO{
     pub id: ObjectId,
     pub name: String,
-    pub path: String,
     pub hash: String,
     pub size: u64,
     pub content_type: String,
@@ -62,12 +60,6 @@ impl Interactor<CreateObjectDTO, CreateObjectResultDTO> for CreateObject<'_> {
         if let Some(name) = &data.name {
             self.validator.validate_object_name(name).unwrap_or_else(|e| {
                 validator_err_map.insert("name".to_string(), e.to_string());
-            });
-        }
-        
-        if let Some(path) = &data.path {
-            self.validator.validate_object_path(path).unwrap_or_else(|e| {
-                validator_err_map.insert("path".to_string(), e.to_string());
             });
         }
         
@@ -128,7 +120,6 @@ impl Interactor<CreateObjectDTO, CreateObjectResultDTO> for CreateObject<'_> {
         let object = self.object_service.create_object(
             object_id,
             data.name,
-            data.path,
             file_info.hash,
             file_info.size,
             file_info.content_type,
@@ -148,7 +139,6 @@ impl Interactor<CreateObjectDTO, CreateObjectResultDTO> for CreateObject<'_> {
         Ok(CreateObjectResultDTO {
             id: object.id,
             name: object.name.unwrap_or(object.id.to_string()),
-            path: object.path.unwrap_or("/".to_string()),
             hash: object.hash,
             size: object.size,
             content_type: object.content_type,

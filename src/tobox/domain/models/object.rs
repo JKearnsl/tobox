@@ -10,7 +10,6 @@ pub type ObjectId = Uuid;
 pub struct Object {
     pub id: ObjectId,
     pub name: Option<String>,
-    pub path: Option<String>,
     pub hash: String,
     pub size: u64,
     pub content_type: String,

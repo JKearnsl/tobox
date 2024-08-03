@@ -21,7 +21,6 @@ pub struct GetObjectInfoDTO {
 pub struct GetObjectInfoResultDTO {
     pub id: ObjectId,
     pub name: String,
-    pub path: String,
     pub hash: String,
     pub size: u64,
     pub content_type: String,
@@ -70,7 +69,6 @@ impl Interactor<GetObjectInfoDTO, GetObjectInfoResultDTO> for GetObjectInfo<'_> 
         Ok(GetObjectInfoResultDTO {
             id: object.id,
             name: object.name.unwrap_or(object.id.to_string()),
-            path: object.path.unwrap_or("/".to_string()),
             hash: object.hash,
             size: object.size,
             content_type: object.content_type,

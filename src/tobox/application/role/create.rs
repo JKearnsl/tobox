@@ -111,7 +111,7 @@ impl Interactor<CreateRoleDTO, CreateRoleResultDTO> for CreateRole<'_> {
             )
         }
         
-        let permissions = match self.permission_gateway.get_permissions_by_ids(
+        let permissions = match self.permission_gateway.get_permissions(
             &data.permissions
         ).await {
             Some(permissions) => permissions,

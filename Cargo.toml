@@ -17,6 +17,7 @@ tokio = { version = "^1.39", features = [
 ] }
 tokio-stream = "^0.1"
 actix-web = {  version = "^4.8", features = ["rustls-0_23"] }
+actix-files = "^0.6"
 actix-multipart = "^0.7"
 rustls = "^0.23"
 rustls-pemfile = "^2.1"

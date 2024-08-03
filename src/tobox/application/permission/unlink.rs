@@ -52,7 +52,7 @@ impl Interactor<UnlinkRolePermissionDTO, ()> for UnlinkRolePermission<'_> {
             validator_err_map.insert("role_id".to_string(), "Role not found".to_string());
         }
 
-        if self.permission_gateway.get_permission_by_id(&data.permission_id).await.is_none() {
+        if self.permission_gateway.get_permission(&data.permission_id).await.is_none() {
             validator_err_map.insert("permission_id".to_string(), "Permission not found".to_string());
         }
 

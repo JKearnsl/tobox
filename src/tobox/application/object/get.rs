@@ -25,7 +25,7 @@ pub struct GetObject<'a> {
 impl Interactor<GetObjectDTO, dyn FileStream> for GetObject<'_> {
     async fn execute(&self, data: GetObjectDTO) -> Result<dyn FileStream, ApplicationError> {
         
-        let object = self.object_reader.get_object_by_id(&data.id).await.ok_or(
+        let object = self.object_reader.get_object(&data.id).await.ok_or(
             ApplicationError::NotFound(
                 ErrorContent::Message("Object not found".to_string())
             )

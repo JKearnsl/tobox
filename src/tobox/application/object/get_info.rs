@@ -40,7 +40,7 @@ pub struct GetObjectInfo<'a> {
 impl Interactor<GetObjectInfoDTO, GetObjectInfoResultDTO> for GetObjectInfo<'_> {
     async fn execute(&self, data: GetObjectInfoDTO) -> Result<GetObjectInfoResultDTO, ApplicationError> {
 
-        let object = self.object_reader.get_object_by_id(&data.id).await.ok_or(
+        let object = self.object_reader.get_object(&data.id).await.ok_or(
             ApplicationError::NotFound(
                 ErrorContent::Message("Object not found".to_string())
             )

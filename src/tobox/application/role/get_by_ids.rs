@@ -57,7 +57,7 @@ impl Interactor<GetRolesByIdsDTO, RolesByIdsResultDTO> for GetRolesByIds<'_> {
             }
         };
         
-        let roles = match self.role_gateway.get_roles_by_ids(&data.ids).await {
+        let roles = match self.role_gateway.get_roles(&data.ids).await {
             Some(roles) => roles,
             None => return Err(
                 ApplicationError::InvalidData(

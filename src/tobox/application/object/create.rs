@@ -19,7 +19,7 @@ use crate::domain::services::validator::ValidatorService;
 
 #[derive(Deserialize)]
 pub struct CreateObjectDTO {
-    pub box_name: String,
+    pub box_id: BoxId,
     pub name: Option<String>,
     pub file: dyn FileStream,
     pub metadata: HashMap<String, String>
@@ -53,10 +53,6 @@ impl Interactor<CreateObjectDTO, CreateObjectResultDTO> for CreateObject<'_> {
         
         let mut validator_err_map: HashMap<String, String> = HashMap::new();
         
-        self.validator.validate_box_name(&data.box_name).unwrap_or_else(|e| {
-            validator_err_map.insert("box_name".to_string(), e.to_string());
-        });
-        
         if let Some(name) = &data.name {
             self.validator.validate_object_name(name).unwrap_or_else(|e| {
                 validator_err_map.insert("name".to_string(), e.to_string());
@@ -75,11 +71,11 @@ impl Interactor<CreateObjectDTO, CreateObjectResultDTO> for CreateObject<'_> {
             )
         }
         
-        
-        let r#box = match self.box_reader.get_box_by_name_not_sensitive(&data.box_name).await {
+
+        let r#box = match self.box_reader.get_box(&data.box_id).await {
             Some(r#box) => r#box,
             None => {
-                validator_err_map.insert("box_name".to_string(), "Box not found".to_string());
+                validator_err_map.insert("box_id".to_string(), "Box not found".to_string());
                 return Err(
                     ApplicationError::InvalidData(
                         ErrorContent::Map(validator_err_map)

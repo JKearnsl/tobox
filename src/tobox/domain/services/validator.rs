@@ -1,10 +1,6 @@
 use std::collections::HashMap;
 
 pub struct ValidatorService {
-    box_name_max_length: usize,
-    box_name_min_length: usize,
-    box_name_regex: regex::Regex,
-    
     object_name_max_length: usize,
     object_name_min_length: usize,
     object_name_regex: regex::Regex,
@@ -31,11 +27,6 @@ impl ValidatorService {
         
         // User - - - - - - - - - - - - - - - - - - - - - - - - - - -
         
-        // Box name
-        let box_name_max_length = 64;
-        let box_name_min_length = 4;
-        let box_name_regex = regex::Regex::new(r"^[a-zA-Zа-яА-Я0-9]*$").unwrap();
-
         // Object name
         let object_name_max_length = 256;
         let object_name_min_length = 1;
@@ -63,9 +54,6 @@ impl ValidatorService {
         let role_description_min_length = 4;
         
         ValidatorService {
-            box_name_max_length,
-            box_name_min_length,
-            box_name_regex,
             object_name_max_length,
             object_name_min_length,
             object_name_regex,
@@ -163,22 +151,6 @@ impl ValidatorService {
                 ));
             }
         }
-        Ok(())
-    }
-
-    pub fn validate_box_name(&self, first_name: &str) -> Result<(), String> {
-        if first_name.len() > self.box_name_max_length || first_name.len() < self.box_name_min_length {
-            return Err(format!(
-                "Box name should be between {} and {} characters",
-                self.box_name_min_length, 
-                self.box_name_max_length
-            ));
-        }
-
-        if !self.box_name_regex.is_match(first_name) {
-            return Err("Box name should contain only letters and numbers".to_string());
-        }
-
         Ok(())
     }
     

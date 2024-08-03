@@ -6,18 +6,10 @@ pub struct BoxService { }
 
 impl BoxService {
 
-    pub fn create_box(&self, name: String) -> Box {
+    pub fn create_box(&self) -> Box {
         Box {
             id: generate_id(16),
-            name,
             created_at: Utc::now(),
-        }
-    }
-
-    pub fn update_box(&self, r#box: Box, new_name: String) -> Box {
-        Box {
-            name: new_name,
-            ..r#box
         }
     }
 }

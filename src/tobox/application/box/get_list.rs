@@ -21,7 +21,6 @@ pub struct GetBoxListDTO {
 #[derive(Debug, Serialize)]
 pub struct BoxItem {
     pub id: BoxId,
-    pub name: String,
     pub created_at: DateTime<Utc>,
 }
 
@@ -94,7 +93,6 @@ impl Interactor<GetBoxListDTO, GetBoxListResultDTO> for GetBoxList<'_> {
         
         Ok(boxes.into_iter().map(|b| BoxItem {
             id: b.id,
-            name: b.name,
             created_at: b.created_at,
         }).collect())
     }

@@ -26,7 +26,7 @@ pub struct CreateObjectDTO {
 }
 
 #[derive(Debug, Serialize)] 
-pub struct CreateObjectResultDTO{
+pub struct CreateObjectResultDTO {
     pub id: ObjectId,
     pub name: String,
     pub hash: String,
@@ -108,7 +108,7 @@ impl Interactor<CreateObjectDTO, CreateObjectResultDTO> for CreateObject<'_> {
             }
         };
         
-        let object_id = ObjectId::new_v4();
+        let object_id = self.object_service.generate_object_id();
 
         let file_info = self.file_storage_writer.save_file(
             &object_id,
@@ -137,8 +137,8 @@ impl Interactor<CreateObjectDTO, CreateObjectResultDTO> for CreateObject<'_> {
         // Todo: sync with other nodes in background
 
         Ok(CreateObjectResultDTO {
-            id: object.id,
-            name: object.name.unwrap_or(object.id.to_string()),
+            id: object.id.clone(),
+            name: object.name.unwrap_or(object.id),
             hash: object.hash,
             size: object.size,
             content_type: object.content_type,

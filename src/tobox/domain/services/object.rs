@@ -1,12 +1,16 @@
 use std::collections::HashMap;
 use chrono::Utc;
-
+use crate::domain::id_generator::generate_id;
 use crate::domain::models::object::{Object, ObjectId};
 use crate::domain::models::r#box::BoxId;
 
 pub struct ObjectService { }
 
 impl ObjectService {
+    
+    pub fn generate_object_id(&self) -> ObjectId {
+        generate_id(25)
+    }
 
     pub fn create_object(
         &self, 

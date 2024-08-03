@@ -1,6 +1,5 @@
-use uuid::Uuid;
-
 use crate::domain::exceptions::DomainError;
+use crate::domain::id_generator::generate_id;
 use crate::domain::models::role::Role;
 
 pub struct RoleService { }
@@ -13,7 +12,7 @@ impl RoleService {
         description: Option<String>,
     ) -> Role {
         Role {
-            id: Uuid::new_v4(),
+            id: generate_id(16),
             title,
             description,
             created_at: Default::default(),

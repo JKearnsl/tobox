@@ -1,10 +1,9 @@
 use std::collections::HashMap;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use uuid::Uuid;
 use crate::domain::models::r#box::BoxId;
 
-pub type ObjectId = Uuid;
+pub type ObjectId = String;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Object {

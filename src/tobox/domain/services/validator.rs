@@ -9,10 +9,6 @@ pub struct ValidatorService {
     object_name_min_length: usize,
     object_name_regex: regex::Regex,
     
-    object_path_max_length: usize,
-    object_path_min_length: usize,
-    object_path_regex: regex::Regex,
-    
     metadata_key_max_length: usize,
     metadata_value_max_length: usize,
     
@@ -43,12 +39,7 @@ impl ValidatorService {
         // Object name
         let object_name_max_length = 256;
         let object_name_min_length = 1;
-        let object_name_regex = regex::Regex::new(r"^[^/]+$").unwrap();
-        
-        // Object path
-        let object_path_max_length = 256;
-        let object_path_min_length = 1;
-        let object_path_regex = regex::Regex::new(r"^(/[^/\x00]+)+/?$").unwrap();
+        let object_name_regex = regex::Regex::new(r"^[^/\\:?]+$").unwrap();
         
         // Object metadata
         let metadata_key_max_length = 64;
@@ -78,9 +69,6 @@ impl ValidatorService {
             object_name_max_length,
             object_name_min_length,
             object_name_regex,
-            object_path_max_length,
-            object_path_min_length,
-            object_path_regex,
             metadata_key_max_length,
             metadata_value_max_length,
             username_max_length,
@@ -153,27 +141,12 @@ impl ValidatorService {
         }
 
         if !self.object_name_regex.is_match(last_name) {
-            return Err("Object name should not contain slashes".to_string());
+            return Err("Object name should not contain special characters: [/, \\, :, ?]".to_string());
         }
 
         Ok(())
     }
     
-    pub fn validate_object_path(&self, path: &str) -> Result<(), String> {
-        if path.len() > self.object_path_max_length || path.len() < self.object_path_min_length {
-            return Err(format!(
-                "Object path should be between {} and {} characters",
-                self.object_path_min_length, 
-                self.object_path_max_length
-            ));
-        }
-
-        if !self.object_path_regex.is_match(path) {
-            return Err("Object path should be a valid unix path".to_string());
-        }
-
-        Ok(())
-    }
     
     pub fn validate_object_metadata(&self, metadata: &HashMap<String, String>) -> Result<(), String> {
         for (key, value) in metadata.iter() {

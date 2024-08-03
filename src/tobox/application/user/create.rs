@@ -9,7 +9,7 @@ use crate::application::common::interactor::Interactor;
 use crate::application::common::role_gateway::RoleGateway;
 use crate::application::common::user_gateway::UserGateway;
 
-use crate::domain::models::user::{UserId, UserState};
+use crate::domain::models::user::UserId;
 use crate::domain::services::access::AccessService;
 use crate::domain::services::user::UserService;
 use crate::domain::services::validator::ValidatorService;
@@ -74,7 +74,7 @@ impl Interactor<CreateUserDTO, CreateUserResultDTO> for CreateUser<'_> {
             None => {
                 return Err(ApplicationError::Forbidden(
                     ErrorContent::Message(
-                        "Node is at initialization stage. The default role is not set!".to_string()
+                        "The default role is not set!".to_string()
                     )
                 ))
             }
@@ -104,6 +104,7 @@ impl Interactor<CreateUserDTO, CreateUserResultDTO> for CreateUser<'_> {
         self.user_gateway.save_user(&user).await;
         self.role_gateway.link_role_to_user(&default_role_id, &user.id).await;
         
+        // todo: sync with other services
 
         Ok(CreateUserResultDTO {
             id: user.id,

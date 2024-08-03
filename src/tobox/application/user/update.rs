@@ -8,7 +8,7 @@ use crate::application::common::id_provider::IdProvider;
 use crate::application::common::interactor::Interactor;
 use crate::application::common::user_gateway::UserGateway;
 use crate::domain::exceptions::DomainError;
-use crate::domain::models::user::{UserId, UserState};
+use crate::domain::models::user::UserId;
 use crate::domain::services::access::AccessService;
 use crate::domain::services::user::UserService;
 use crate::domain::services::validator::ValidatorService;
@@ -76,8 +76,7 @@ impl Interactor<UpdateUserDTO, UpdateUserResultDTO> for UpdateUser<'_> {
                 )
             )
         }
-
-        // Todo: to gather
+        
         let user_by_username = self.user_gateway.get_user_by_username_not_sensitive(&data.username).await;
 
         if user_by_username.is_some() && user_by_username.unwrap().id != data.id {
@@ -100,6 +99,8 @@ impl Interactor<UpdateUserDTO, UpdateUserResultDTO> for UpdateUser<'_> {
         );
 
         self.user_gateway.save_user(&new_user).await;
+        
+        // todo: sync with other services
 
         Ok(UpdateUserResultDTO {
             id: new_user.id,

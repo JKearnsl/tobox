@@ -10,11 +10,12 @@ pub struct Permission {
 
 #[derive(Display, Debug, Clone)]
 pub enum PermissionTag {
-    GetUserSelf,
     GetUser,
     CreateUser,
-    UpdateUser,
     DeleteUser,
+    
+    CreateSession,
+    DeleteSession,
     
     GetRole,
     CreateRole,
@@ -23,18 +24,14 @@ pub enum PermissionTag {
     SetDefaultRole,
     LinkUserRole,
     GetUserRole,
-    GetSelfRole,
     
     GetPermission,
     LinkRolePermission,
     
     GetBox,
     CreateBox,
-    UpdateBox,
     DeleteBox,
     
-    #[strum(serialize = "UpdateSpecificBox({0})")]
-    UpdateSpecificBox(BoxId),
     #[strum(serialize = "DeleteSpecificBox({0})")]
     DeleteSpecificBox(BoxId),
     

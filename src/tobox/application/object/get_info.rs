@@ -41,9 +41,7 @@ impl Interactor<GetObjectInfoDTO, GetObjectInfoResultDTO> for GetObjectInfo<'_> 
     async fn execute(&self, data: GetObjectInfoDTO) -> Result<GetObjectInfoResultDTO, ApplicationError> {
 
         let object = self.object_reader.get_object(&data.id).await.ok_or(
-            ApplicationError::NotFound(
-                ErrorContent::Message("Object not found".to_string())
-            )
+            ApplicationError::NotFound(ErrorContent::from("Object not found"))
         )?;
 
         match self.access_service.ensure_can_get_object(
@@ -54,14 +52,10 @@ impl Interactor<GetObjectInfoDTO, GetObjectInfoResultDTO> for GetObjectInfo<'_> 
             Ok(_) => (),
             Err(error) => return match error {
                 DomainError::AccessDenied => Err(
-                    ApplicationError::Forbidden(
-                        ErrorContent::Message(error.to_string())
-                    )
+                    ApplicationError::Forbidden(ErrorContent::from(error))
                 ),
                 DomainError::AuthorizationRequired => Err(
-                    ApplicationError::Unauthorized(
-                        ErrorContent::Message(error.to_string())
-                    )
+                    ApplicationError::Unauthorized(ErrorContent::from(error))
                 )
             }
         };

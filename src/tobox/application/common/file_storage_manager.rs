@@ -2,9 +2,15 @@ use async_trait::async_trait;
 use crate::domain::models::file_info::FileInfo;
 use crate::domain::models::file_stream::FileStream;
 
+
+pub enum FileStorageError {
+    InvalidContentType(String),
+    InvalidSize(String)
+}
+
 #[async_trait]
 pub trait FileStorageReader {
-    async fn read_file<T: Into<String>>(&self, filename: &T) -> dyn FileStream;
+    async fn read_file(&self, filename: &str) -> Box<dyn FileStream>;
 }
 
 #[async_trait]
@@ -24,15 +30,15 @@ pub trait FileStorageWriter {
     /// 
     /// Content-type, filesize and hash are calculated during file upload, it justifies the 
     /// existence of this function
-    async fn save_file<F: Into<String>, CT: Into<String>>(
+    async fn save_file(
         &self, 
-        filename: &F,
-        content_type: Option<&CT>,
+        filename: &str,
+        content_type: Option<&str>,
         size_range: Option<(u64, u64)>,
         bytes: &dyn FileStream
-    ) -> FileInfo;
+    ) -> Result<FileInfo, FileStorageError>;
     
-    async fn rename_file<T: Into<String>, U: Into<String>>(&self, filename: &T, new_filename: &U);
+    async fn rename_file(&self, filename: &str, new_filename: &str);
 }
 
 #[async_trait]

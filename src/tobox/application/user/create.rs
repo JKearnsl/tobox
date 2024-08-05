@@ -8,7 +8,7 @@ use crate::application::common::id_provider::IdProvider;
 use crate::application::common::interactor::Interactor;
 use crate::application::common::role_gateway::RoleGateway;
 use crate::application::common::user_gateway::UserGateway;
-
+use crate::domain::exceptions::DomainError;
 use crate::domain::models::user::UserId;
 use crate::domain::services::access::AccessService;
 use crate::domain::services::user::UserService;
@@ -41,14 +41,18 @@ impl Interactor<CreateUserDTO, CreateUserResultDTO> for CreateUser<'_> {
     async fn execute(&self, data: CreateUserDTO) -> Result<CreateUserResultDTO, ApplicationError> {
         
         match self.access_service.ensure_can_create_user(
-            &self.id_provider.permissions()
+            self.id_provider.is_auth(),
+            self.id_provider.permissions()
         ) {
             Ok(_) => (),
-            Err(e) => return Err(
-                ApplicationError::Forbidden(
-                    ErrorContent::Message(e.to_string())
+            Err(error) => return match error {
+                DomainError::AccessDenied => Err(
+                    ApplicationError::Forbidden(ErrorContent::from(error))
+                ),
+                DomainError::AuthorizationRequired => Err(
+                    ApplicationError::Unauthorized(ErrorContent::from(error))
                 )
-            )
+            }
         };
 
         let mut validator_err_map: HashMap<String, String> = HashMap::new();
@@ -63,9 +67,7 @@ impl Interactor<CreateUserDTO, CreateUserResultDTO> for CreateUser<'_> {
 
         if !validator_err_map.is_empty() {
             return Err(
-                ApplicationError::InvalidData(
-                    ErrorContent::Map(validator_err_map)
-                )
+                ApplicationError::InvalidData(ErrorContent::from(validator_err_map))
             )
         }
         
@@ -73,14 +75,14 @@ impl Interactor<CreateUserDTO, CreateUserResultDTO> for CreateUser<'_> {
             Some(role) => role.id,
             None => {
                 return Err(ApplicationError::Forbidden(
-                    ErrorContent::Message(
-                        "The default role is not set!".to_string()
-                    )
+                    ErrorContent::from("The default role is not set!")
                 ))
             }
         };
         
-        let user_by_username = self.user_gateway.get_user_by_username_not_sensitive(&data.username).await;
+        let user_by_username = self.user_gateway.get_user_by_username_not_sensitive(
+            &data.username
+        ).await;
         
         if user_by_username.is_some() {
             validator_err_map.insert("username".to_string(), "Username taken".to_string());
@@ -88,9 +90,7 @@ impl Interactor<CreateUserDTO, CreateUserResultDTO> for CreateUser<'_> {
 
         if !validator_err_map.is_empty() {
             return Err(
-                ApplicationError::InvalidData(
-                    ErrorContent::Map(validator_err_map)
-                )
+                ApplicationError::InvalidData(ErrorContent::from(validator_err_map))
             )
         }
         

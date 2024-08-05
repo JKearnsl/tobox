@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::application::common::box_gateway::BoxReader;
 use crate::application::common::exceptions::{ApplicationError, ErrorContent};
-use crate::application::common::file_storage_manager::FileStorageWriter;
+use crate::application::common::file_storage_manager::{FileStorageError, FileStorageWriter};
 use crate::application::common::id_provider::IdProvider;
 use crate::application::common::interactor::Interactor;
 use crate::application::common::object_gateway::ObjectGateway;
@@ -21,7 +21,7 @@ use crate::domain::services::validator::ValidatorService;
 pub struct CreateObjectDTO {
     pub box_id: BoxId,
     pub name: Option<String>,
-    pub file: dyn FileStream,
+    pub file: Box<dyn FileStream>,
     pub metadata: HashMap<String, String>
 }
 
@@ -65,9 +65,7 @@ impl Interactor<CreateObjectDTO, CreateObjectResultDTO> for CreateObject<'_> {
         
         if !validator_err_map.is_empty() {
             return Err(
-                ApplicationError::InvalidData(
-                    ErrorContent::Map(validator_err_map)
-                )
+                ApplicationError::InvalidData(ErrorContent::from(validator_err_map))
             )
         }
         
@@ -77,9 +75,7 @@ impl Interactor<CreateObjectDTO, CreateObjectResultDTO> for CreateObject<'_> {
             None => {
                 validator_err_map.insert("box_id".to_string(), "Box not found".to_string());
                 return Err(
-                    ApplicationError::InvalidData(
-                        ErrorContent::Map(validator_err_map)
-                    )
+                    ApplicationError::InvalidData(ErrorContent::from(validator_err_map))
                 )
             }
         };
@@ -92,26 +88,32 @@ impl Interactor<CreateObjectDTO, CreateObjectResultDTO> for CreateObject<'_> {
             Ok(_) => (),
             Err(error) => return match error {
                 DomainError::AccessDenied => Err(
-                    ApplicationError::Forbidden(
-                        ErrorContent::Message(error.to_string())
-                    )
+                    ApplicationError::Forbidden(ErrorContent::from(error))
                 ),
                 DomainError::AuthorizationRequired => Err(
-                    ApplicationError::Unauthorized(
-                        ErrorContent::Message(error.to_string())
-                    )
+                    ApplicationError::Unauthorized(ErrorContent::from(error))
                 )
             }
         };
         
         let object_id = self.object_service.generate_object_id();
-
-        let file_info = self.file_storage_writer.save_file(
+        
+        let file_info = match self.file_storage_writer.save_file(
             &object_id,
             None,
             None,
-            data.file
-        ).await;
+            data.file.as_ref()
+        ).await {
+            Ok(file_info) => file_info,
+            Err(error) => return match error {
+                FileStorageError::InvalidContentType(text) => Err(
+                    ApplicationError::InvalidData(ErrorContent::from(text))
+                ),
+                FileStorageError::InvalidSize(text) => Err(
+                    ApplicationError::InvalidData(ErrorContent::from(text))
+                )
+            }
+        };
         
         let object = self.object_service.create_object(
             object_id,

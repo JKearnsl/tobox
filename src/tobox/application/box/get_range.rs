@@ -13,7 +13,7 @@ use crate::domain::services::access::AccessService;
 use crate::domain::services::validator::ValidatorService;
 
 #[derive(Debug, Deserialize)]
-pub struct GetBoxListDTO {
+pub struct GetBoxRangeDTO {
     pub page: Option<u64>,
     pub per_page: Option<u64>,
 }
@@ -24,17 +24,17 @@ pub struct BoxItem {
     pub created_at: DateTime<Utc>,
 }
 
-pub type GetBoxListResultDTO = Vec<BoxItem>;
+pub type GetBoxRangeResultDTO = Vec<BoxItem>;
 
-pub struct GetBoxList<'a> {
+pub struct GetBoxRange<'a> {
     pub box_reader: &'a dyn BoxReader,
     pub validator: &'a ValidatorService,
     pub access_service: &'a AccessService,
     pub id_provider: Box<dyn IdProvider>,
 }
 
-impl Interactor<GetBoxListDTO, GetBoxListResultDTO> for GetBoxList<'_> {
-    async fn execute(&self, data: GetBoxListDTO) -> Result<GetBoxListResultDTO, ApplicationError> {
+impl Interactor<GetBoxRangeDTO, GetBoxRangeResultDTO> for GetBoxRange<'_> {
+    async fn execute(&self, data: GetBoxRangeDTO) -> Result<GetBoxRangeResultDTO, ApplicationError> {
 
         match self.access_service.ensure_can_get_box(
             self.id_provider.is_auth(),
@@ -43,34 +43,25 @@ impl Interactor<GetBoxListDTO, GetBoxListResultDTO> for GetBoxList<'_> {
             Ok(_) => (),
             Err(error) => return match error {
                 DomainError::AccessDenied => Err(
-                    ApplicationError::Forbidden(    
-                        ErrorContent::Message(error.to_string())
-                    )
+                    ApplicationError::Forbidden(ErrorContent::from(error))
                 ),
                 DomainError::AuthorizationRequired => Err(
-                    ApplicationError::Unauthorized(
-                        ErrorContent::Message(error.to_string())
-                    )
+                    ApplicationError::Unauthorized(ErrorContent::from(error))
                 )
             }
         };
-        
         
         let mut validator_err_map: HashMap<String, String> = HashMap::new();
         
         let boxes = if data.page.is_some() && data.per_page.is_none() {
             validator_err_map.insert("per_page".to_string(), "is required".to_string());
             return Err(
-                ApplicationError::InvalidData(
-                    ErrorContent::Map(validator_err_map)
-                )
+                ApplicationError::InvalidData(ErrorContent::from(validator_err_map))
             )
         } else if data.page.is_none() && data.per_page.is_some() {
             validator_err_map.insert("page".to_string(), "is required".to_string());
             return Err(
-                ApplicationError::InvalidData(
-                    ErrorContent::Map(validator_err_map)
-                )
+                ApplicationError::InvalidData(ErrorContent::from(validator_err_map))
             )
         } else if data.page.is_some() && data.per_page.is_some() {
             self.validator.validate_page(&data.page.unwrap()).unwrap_or_else(|e| {
@@ -81,12 +72,10 @@ impl Interactor<GetBoxListDTO, GetBoxListResultDTO> for GetBoxList<'_> {
             });
             if !validator_err_map.is_empty() {
                 return Err(
-                    ApplicationError::InvalidData(
-                        ErrorContent::Map(validator_err_map)
-                    )
+                    ApplicationError::InvalidData(ErrorContent::from(validator_err_map))
                 )
             }
-            self.box_reader.get_boxes_paginated(data.page.unwrap(), data.per_page.unwrap()).await
+            self.box_reader.get_boxes_range(&data.page.unwrap(), &data.per_page.unwrap()).await
         } else {
             self.box_reader.get_boxes().await
         };

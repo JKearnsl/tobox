@@ -37,20 +37,17 @@ pub struct GetUserRange<'a> {
 impl Interactor<GetUserRangeDTO, GetUserRangeResultDTO> for GetUserRange<'_> {
     async fn execute(&self, data: GetUserRangeDTO) -> Result<GetUserRangeResultDTO, ApplicationError> {
         
-        match self.access_service.ensure_can_get_user_range(
-            &self.id_provider.permissions()
+        match self.access_service.ensure_can_get_user(
+            self.id_provider.is_auth(),
+            self.id_provider.permissions()
         ) {
             Ok(_) => (),
             Err(error) => return match error {
                 DomainError::AccessDenied => Err(
-                    ApplicationError::Forbidden(
-                        ErrorContent::Message(error.to_string())
-                    )
+                    ApplicationError::Forbidden(ErrorContent::from(error))
                 ),
                 DomainError::AuthorizationRequired => Err(
-                    ApplicationError::Unauthorized(
-                        ErrorContent::Message(error.to_string())
-                    )
+                    ApplicationError::Unauthorized(ErrorContent::from(error))
                 )
             }
         };
@@ -66,9 +63,7 @@ impl Interactor<GetUserRangeDTO, GetUserRangeResultDTO> for GetUserRange<'_> {
         
         if !validator_err_map.is_empty() {
             return Err(
-                ApplicationError::InvalidData(
-                    ErrorContent::Map(validator_err_map)
-                )
+                ApplicationError::InvalidData(ErrorContent::from(validator_err_map))
             )
         }
         

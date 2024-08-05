@@ -1,6 +1,6 @@
 [package]
 name = "tobox"
-version = "0.1.3"
+version = "0.1.4"
 authors = ["JKearnsl <pooolg@hotmail.com>"]
 edition = "2021"
 
@@ -43,3 +43,4 @@ sqlx = { version = "^0.8", features = [
     "sqlx-sqlite",
     "chrono"
 ] }
+rand = "0.8.5"

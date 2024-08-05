@@ -22,13 +22,11 @@ pub struct GetObject<'a> {
     pub id_provider: Box<dyn IdProvider>
 }
 
-impl Interactor<GetObjectDTO, dyn FileStream> for GetObject<'_> {
-    async fn execute(&self, data: GetObjectDTO) -> Result<dyn FileStream, ApplicationError> {
+impl Interactor<GetObjectDTO, Box<dyn FileStream>> for GetObject<'_> {
+    async fn execute(&self, data: GetObjectDTO) -> Result<Box<dyn FileStream>, ApplicationError> {
         
         let object = self.object_reader.get_object(&data.id).await.ok_or(
-            ApplicationError::NotFound(
-                ErrorContent::Message("Object not found".to_string())
-            )
+            ApplicationError::NotFound(ErrorContent::from("Object not found"))
         )?;
 
         match self.access_service.ensure_can_get_object(
@@ -39,14 +37,10 @@ impl Interactor<GetObjectDTO, dyn FileStream> for GetObject<'_> {
             Ok(_) => (),
             Err(error) => return match error {
                 DomainError::AccessDenied => Err(
-                    ApplicationError::Forbidden(
-                        ErrorContent::Message(error.to_string())
-                    )
+                    ApplicationError::Forbidden(ErrorContent::from(error))
                 ),
                 DomainError::AuthorizationRequired => Err(
-                    ApplicationError::Unauthorized(
-                        ErrorContent::Message(error.to_string())
-                    )
+                    ApplicationError::Unauthorized(ErrorContent::from(error))
                 )
             }
         };

@@ -1,4 +1,4 @@
 
-pub mod get_list;
+pub mod get_range;
 pub mod create;
 pub mod delete;

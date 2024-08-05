@@ -28,29 +28,22 @@ impl Interactor<RoleId, Vec<PermissionItemResult>> for GetRolePermissions<'_> {
     async fn execute(&self, data: RoleId) -> Result<Vec<PermissionItemResult>, ApplicationError> {
         
         match self.access_service.ensure_can_get_permissions(
-            &self.id_provider.permissions()
+            self.id_provider.is_auth(),
+            self.id_provider.permissions()
         ) {
             Ok(_) => (),
             Err(error) => return match error {
                 DomainError::AccessDenied => Err(
-                    ApplicationError::Forbidden(
-                        ErrorContent::Message(error.to_string())
-                    )
+                    ApplicationError::Forbidden(ErrorContent::from(error))
                 ),
                 DomainError::AuthorizationRequired => Err(
-                    ApplicationError::Unauthorized(
-                        ErrorContent::Message(error.to_string())
-                    )
+                    ApplicationError::Unauthorized(ErrorContent::from(error))
                 )
             }
         };
         
-        self.role_reader.get_role(
-            &data
-        ).await.ok_or(
-            ApplicationError::InvalidData(
-                ErrorContent::Message("Role not found".to_string())
-            )
+        self.role_reader.get_role(&data).await.ok_or(
+            ApplicationError::InvalidData(ErrorContent::from("Role not found"))
         )?;
         
         let permissions = self.permission_reader.get_role_permissions(

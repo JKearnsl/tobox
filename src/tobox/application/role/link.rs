@@ -30,20 +30,15 @@ impl Interactor<LinkRoleUserDTO, ()> for LinkRoleUser<'_> {
 
         match self.access_service.ensure_can_link_role_user(
             self.id_provider.is_auth(),
-            self.id_provider.user_state(),
             self.id_provider.permissions()
         ) {
             Ok(_) => (),
             Err(error) => return match error {
                 DomainError::AccessDenied => Err(
-                    ApplicationError::Forbidden(
-                        ErrorContent::Message(error.to_string())
-                    )
+                    ApplicationError::Forbidden(ErrorContent::from(error))
                 ),
                 DomainError::AuthorizationRequired => Err(
-                    ApplicationError::Unauthorized(
-                        ErrorContent::Message(error.to_string())
-                    )
+                    ApplicationError::Unauthorized(ErrorContent::from(error))
                 )
             }
         };
@@ -53,14 +48,14 @@ impl Interactor<LinkRoleUserDTO, ()> for LinkRoleUser<'_> {
             validator_err_map.insert("role_id".to_string(), "Role not found".to_string());
         }
 
-        if self.user_reader.get_user_by_id(&data.user_id).await.is_none() {
+        if self.user_reader.get_user(&data.user_id).await.is_none() {
             validator_err_map.insert("user_id".to_string(), "User not found".to_string());
         }
 
         if !validator_err_map.is_empty() {
             return Err(
                 ApplicationError::InvalidData(
-                    ErrorContent::Map(validator_err_map)
+                    ErrorContent::from(validator_err_map)
                 )
             )
         }
@@ -68,7 +63,7 @@ impl Interactor<LinkRoleUserDTO, ()> for LinkRoleUser<'_> {
         if self.role_gateway.is_role_linked_to_user(&data.role_id, &data.user_id).await {
             return Err(
                 ApplicationError::InvalidData(
-                    ErrorContent::Message("Role already linked to user".to_string())
+                    ErrorContent::from("Role already linked to user")
                 )
             )
         }

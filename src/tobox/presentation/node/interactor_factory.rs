@@ -1,10 +1,15 @@
 use crate::application::common::id_provider::IdProvider;
+use crate::application::object::create::CreateObject;
+use crate::application::object::get::GetObject;
+use crate::application::object::get_info::GetObjectInfo;
 use crate::application::permission::get_by_role::GetRolePermissions;
 use crate::application::permission::get_by_user::GetUserPermissions;
 use crate::application::permission::get_range::GetPermissionRange;
 use crate::application::permission::link::LinkRolePermission;
 use crate::application::permission::unlink::UnlinkRolePermission;
-use crate::application::permission::update::UpdatePermission;
+use crate::application::r#box::create::CreateBox;
+use crate::application::r#box::delete::DeleteBox;
+use crate::application::r#box::get_range::GetBoxRange;
 use crate::application::role::create::CreateRole;
 use crate::application::role::delete::DeleteRole;
 use crate::application::role::get_by_id::GetRoleById;
@@ -16,53 +21,23 @@ use crate::application::role::link::LinkRoleUser;
 use crate::application::role::set_default::SetDefaultRole;
 use crate::application::role::unlink::UnlinkRoleUser;
 use crate::application::role::update::UpdateRole;
-use crate::application::service::get_by_id::GetService;
-use crate::application::service::get_range::GetServiceRange;
-use crate::application::service::sync::ServiceSync;
-use crate::application::service::update::UpdateService;
 use crate::application::session::create::CreateSession;
-use crate::application::session::delete::DeleteSession;
-use crate::application::session::delete_self::DeleteSessionSelf;
-use crate::application::session::extract_payload::EPSession;
-use crate::application::session::get_access_log::GetAccessLog;
-use crate::application::session::get_access_log_self::GetAccessLogSelf;
-use crate::application::session::get_by_id::GetSessionById;
-use crate::application::session::get_by_user_id::GetSessionsByUserId;
-use crate::application::session::get_self::GetSessionSelf;
-use crate::application::user::change_password::ChangePassword;
-use crate::application::user::confirm::ConfirmUser;
 use crate::application::user::create::CreateUser;
 use crate::application::user::get_by_id::GetUserById;
-use crate::application::user::get_by_ids::GetUsersByIds;
 use crate::application::user::get_range::GetUserRange;
 use crate::application::user::get_self::GetUserSelf;
-use crate::application::user::reset_password::ResetPassword;
-use crate::application::user::send_confirm_code::SendConfirmCode;
-use crate::application::user::update::UpdateUser;
-use crate::application::user::update_self::UpdateUserSelf;
+use crate::application::user::delete::DeleteUser;
 
-pub trait InteractorFactory: Send + Sync {
+
+pub trait InteractorFactory {
     fn get_user_by_id(&self, id_provider: Box<dyn IdProvider>) -> GetUserById;
-    fn get_users_by_ids(&self, id_provider: Box<dyn IdProvider>) -> GetUsersByIds;
     fn get_user_range(&self, id_provider: Box<dyn IdProvider>) -> GetUserRange;
     fn get_user_self(&self, id_provider: Box<dyn IdProvider>) -> GetUserSelf;
     fn create_user(&self, id_provider: Box<dyn IdProvider>) -> CreateUser;
-    fn update_user(&self, id_provider: Box<dyn IdProvider>) -> UpdateUser;
-    fn update_user_self(&self, id_provider: Box<dyn IdProvider>) -> UpdateUserSelf;
+    fn delete_user(&self, id_provider: Box<dyn IdProvider>) -> DeleteUser;
+    
     fn create_session(&self, id_provider: Box<dyn IdProvider>) -> CreateSession;
-    fn delete_session(&self, id_provider: Box<dyn IdProvider>) -> DeleteSession;
-    fn delete_self_session(&self, id_provider: Box<dyn IdProvider>) -> DeleteSessionSelf;
-    fn get_session_by_id(&self, id_provider: Box<dyn IdProvider>) -> GetSessionById;
-    fn get_sessions_by_user_id(&self, id_provider: Box<dyn IdProvider>) -> GetSessionsByUserId;
-    fn get_sessions_self(&self, id_provider: Box<dyn IdProvider>) -> GetSessionSelf;
-    fn extract_payload(&self, id_provider: Box<dyn IdProvider>) -> EPSession;
-    fn sync_service(&self) -> ServiceSync;
-    fn send_confirm_code(&self, id_provider: Box<dyn IdProvider>) -> SendConfirmCode;
-    fn confirm_user(&self, id_provider: Box<dyn IdProvider>) -> ConfirmUser;
-    fn change_password(&self, id_provider: Box<dyn IdProvider>) -> ChangePassword;
-    fn reset_password(&self, id_provider: Box<dyn IdProvider>) -> ResetPassword;
-    fn get_access_log_self(&self, id_provider: Box<dyn IdProvider>) -> GetAccessLogSelf;
-    fn get_access_log(&self, id_provider: Box<dyn IdProvider>) -> GetAccessLog;
+    
     fn create_role(&self, id_provider: Box<dyn IdProvider>) -> CreateRole;
     fn get_role_by_id(&self, id_provider: Box<dyn IdProvider>) -> GetRoleById;
     fn get_roles_by_ids(&self, id_provider: Box<dyn IdProvider>) -> GetRolesByIds;
@@ -74,13 +49,19 @@ pub trait InteractorFactory: Send + Sync {
     fn unlink_role_user(&self, id_provider: Box<dyn IdProvider>) -> UnlinkRoleUser;
     fn update_role(&self, id_provider: Box<dyn IdProvider>) -> UpdateRole;
     fn delete_role(&self, id_provider: Box<dyn IdProvider>) -> DeleteRole;
+    
     fn get_permission_range(&self, id_provider: Box<dyn IdProvider>) -> GetPermissionRange;
     fn get_role_permissions(&self, id_provider: Box<dyn IdProvider>) -> GetRolePermissions;
     fn get_user_permissions(&self, id_provider: Box<dyn IdProvider>) -> GetUserPermissions;
-    fn update_permission(&self, id_provider: Box<dyn IdProvider>) -> UpdatePermission;
     fn link_role_permission(&self, id_provider: Box<dyn IdProvider>) -> LinkRolePermission;
     fn unlink_role_permission(&self, id_provider: Box<dyn IdProvider>) -> UnlinkRolePermission;
-    fn get_service(&self, id_provider: Box<dyn IdProvider>) -> GetService;
-    fn get_service_range(&self, id_provider: Box<dyn IdProvider>) -> GetServiceRange;
-    fn update_service(&self, id_provider: Box<dyn IdProvider>) -> UpdateService;
+    
+    fn create_box(&self, id_provider: Box<dyn IdProvider>) -> CreateBox;
+    fn delete_box(&self, id_provider: Box<dyn IdProvider>) -> DeleteBox;
+    fn get_box_range(&self, id_provider: Box<dyn IdProvider>) -> GetBoxRange;
+    
+    fn create_object(&self, id_provider: Box<dyn IdProvider>) -> CreateObject;
+    fn get_object(&self, id_provider: Box<dyn IdProvider>) -> GetObject;
+    fn get_object_info(&self, id_provider: Box<dyn IdProvider>) -> GetObjectInfo;
+    
 }

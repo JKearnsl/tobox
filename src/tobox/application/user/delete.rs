@@ -3,26 +3,29 @@ use serde::Deserialize;
 use crate::application::common::exceptions::{ApplicationError, ErrorContent};
 use crate::application::common::id_provider::IdProvider;
 use crate::application::common::interactor::Interactor;
-use crate::application::common::role_gateway::RoleGateway;
+use crate::application::common::user_gateway::UserGateway;
 use crate::domain::exceptions::DomainError;
-use crate::domain::models::role::RoleId;
+use crate::domain::models::user::UserId;
 use crate::domain::services::access::AccessService;
+use crate::domain::services::validator::ValidatorService;
 
 #[derive(Debug, Deserialize)]
-pub struct DeleteRoleDTO {
-    id: RoleId,
+pub struct DeleteUserDTO {
+    pub id: UserId,
 }
 
-pub struct DeleteRole<'a> {
-    pub role_gateway: &'a dyn RoleGateway,
+
+pub struct DeleteUser<'a> {
+    pub user_gateway: &'a dyn UserGateway,
     pub id_provider: Box<dyn IdProvider>,
     pub access_service: &'a AccessService,
+    pub validator: &'a ValidatorService
 }
 
-impl Interactor<DeleteRoleDTO, ()> for DeleteRole<'_> {
-    async fn execute(&self, data: DeleteRoleDTO) -> Result<(), ApplicationError> {
-
-        match self.access_service.ensure_can_delete_role(
+impl Interactor<DeleteUserDTO, ()> for DeleteUser<'_> {
+    async fn execute(&self, data: DeleteUserDTO) -> Result<(), ApplicationError> {
+        
+        match self.access_service.ensure_can_delete_user(
             self.id_provider.is_auth(),
             &self.id_provider.permissions()
         ) {
@@ -35,16 +38,21 @@ impl Interactor<DeleteRoleDTO, ()> for DeleteRole<'_> {
                     ApplicationError::Unauthorized(ErrorContent::from(error))
                 )
             }
+        }
+        
+        match self.user_gateway.get_user(&data.id).await {
+            Some(user) => user,
+            None => {
+                return Err(
+                    ApplicationError::NotFound(ErrorContent::from("User not found"))
+                );
+            }
         };
         
-        self.role_gateway.get_role(&data.id).await.ok_or_else(|| {
-            ApplicationError::NotFound(ErrorContent::from("Role not found"))
-        })?;
-
-        self.role_gateway.remove_role(&data.id).await;
+        self.user_gateway.remove_user(&data.id).await;
         
         // todo: sync with other services
-        
+
         Ok(())
     }
 }

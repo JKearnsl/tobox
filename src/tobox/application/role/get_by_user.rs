@@ -39,29 +39,24 @@ impl Interactor<GetUserRolesDTO, UserRolesResultDTO> for GetUserRoles<'_> {
         
         match self.access_service.ensure_can_get_user_roles(
             self.id_provider.is_auth(),
-            self.id_provider.user_state(),
             self.id_provider.permissions()
         ) {
             Ok(_) => (),
             Err(error) => return match error {
                 DomainError::AccessDenied => Err(
-                    ApplicationError::Forbidden(
-                        ErrorContent::Message(error.to_string())
-                    )
+                    ApplicationError::Forbidden(ErrorContent::from(error))
                 ),
                 DomainError::AuthorizationRequired => Err(
-                    ApplicationError::Unauthorized(
-                        ErrorContent::Message(error.to_string())
-                    )
+                    ApplicationError::Unauthorized(ErrorContent::from(error))
                 )
             }
         };
         
-        match self.user_reader.get_user_by_id(&data.user_id).await {
+        match self.user_reader.get_user(&data.user_id).await {
             Some(_) => (),
             None => return Err(
                 ApplicationError::InvalidData(
-                    ErrorContent::Message("User not found".to_string())
+                    ErrorContent::from("User not found")
                 )
             )
         };

@@ -7,3 +7,4 @@ pub mod permission;
 pub mod r#box;
 pub mod object;
 pub mod sync;
+pub mod session;

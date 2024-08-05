@@ -1,11 +1,3 @@
-pub mod get_by_id;
-pub mod get_by_ids;
-pub mod get_range;
-pub mod get_self;
+
 pub mod add_node;
-pub mod update;
-pub mod update_self;
-pub mod send_confirm_code;
-pub mod confirm;
 pub mod get_nodes;
-pub mod reset_password;

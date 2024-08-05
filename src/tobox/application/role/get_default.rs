@@ -40,20 +40,15 @@ impl Interactor<(), GetDefaultRoleResult> for GetDefaultRole<'_> {
         
         match self.access_service.ensure_can_get_role(
             self.id_provider.is_auth(),
-            self.id_provider.user_state(),
             self.id_provider.permissions()
         ) {
             Ok(_) => (),
             Err(error) => return match error {
                 DomainError::AccessDenied => Err(
-                    ApplicationError::Forbidden(
-                        ErrorContent::Message(error.to_string())
-                    )
+                    ApplicationError::Forbidden(ErrorContent::from(error))
                 ),
                 DomainError::AuthorizationRequired => Err(
-                    ApplicationError::Unauthorized(
-                        ErrorContent::Message(error.to_string())
-                    )
+                    ApplicationError::Unauthorized(ErrorContent::from(error))
                 )
             }
         };
@@ -61,7 +56,7 @@ impl Interactor<(), GetDefaultRoleResult> for GetDefaultRole<'_> {
         
         let role = self.role_reader.get_default_role().await.ok_or(
             ApplicationError::NotFound(
-                ErrorContent::Message("The default role has not been set yet".to_string())
+                ErrorContent::from("The default role has not been set yet")
             )
         )?;
         

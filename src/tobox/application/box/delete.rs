@@ -34,24 +34,18 @@ impl Interactor<DeleteBoxDTO, ()> for DeleteBox<'_> {
             Ok(_) => (),
             Err(error) => return match error {
                 DomainError::AccessDenied => Err(
-                    ApplicationError::Forbidden(
-                        ErrorContent::Message(error.to_string())
-                    )
+                    ApplicationError::Forbidden(ErrorContent::from(error))
                 ),
                 DomainError::AuthorizationRequired => Err(
-                    ApplicationError::Unauthorized(
-                        ErrorContent::Message(error.to_string())
-                    )
+                    ApplicationError::Unauthorized(ErrorContent::from(error))
                 )
             }
         };
         
-        match self.box_gateway.get_box_by_id(&data.id).await {
+        match self.box_gateway.get_box(&data.id).await {
             Some(_) => (),
             None => return Err(
-                ApplicationError::InvalidData(
-                    ErrorContent::Message("Box not found".to_string())
-                )
+                ApplicationError::InvalidData(ErrorContent::from("Box not found"))
             )
         }
         

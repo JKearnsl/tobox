@@ -25,12 +25,12 @@ impl RoleService {
         role: Role,
         new_title: String,
         new_description: Option<String>,
-    ) -> Result<Role, DomainError> {
-        Ok(Role {
+    ) -> Role {
+        Role {
             title: new_title,
             description: new_description,
             updated_at: Some(chrono::Utc::now()),
             ..role
-        })
+        }
     }
 }

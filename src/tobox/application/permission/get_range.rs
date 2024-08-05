@@ -37,19 +37,16 @@ impl Interactor<GetPermissionRangeDTO, Vec<PermissionItemResult>> for GetPermiss
     ) -> Result<Vec<PermissionItemResult>, ApplicationError> {
         
         match self.access_service.ensure_can_get_permissions(
-            &self.id_provider.permissions()
+            self.id_provider.is_auth(),
+            self.id_provider.permissions()
         ) {
             Ok(_) => (),
             Err(error) => return match error {
                 DomainError::AccessDenied => Err(
-                    ApplicationError::Forbidden(
-                        ErrorContent::Message(error.to_string())
-                    )
+                    ApplicationError::Forbidden(ErrorContent::from(error))
                 ),
                 DomainError::AuthorizationRequired => Err(
-                    ApplicationError::Unauthorized(
-                        ErrorContent::Message(error.to_string())
-                    )
+                    ApplicationError::Unauthorized(ErrorContent::from(error))
                 )
             }
         };
@@ -65,9 +62,7 @@ impl Interactor<GetPermissionRangeDTO, Vec<PermissionItemResult>> for GetPermiss
         
         if !validator_err_map.is_empty() {
             return Err(
-                ApplicationError::InvalidData(
-                    ErrorContent::Map(validator_err_map)
-                )
+                ApplicationError::InvalidData(ErrorContent::from(validator_err_map))
             )
         }
         

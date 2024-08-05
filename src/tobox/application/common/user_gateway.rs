@@ -15,4 +15,9 @@ pub trait UserWriter {
     async fn save_user(&self, data: &UserDomain);
 }
 
-pub trait UserGateway: UserReader + UserWriter {}
+#[async_trait]
+pub trait UserRemover {
+    async fn remove_user(&self, user_id: &UserId);
+}
+
+pub trait UserGateway: UserReader + UserWriter + UserRemover {}

@@ -33,22 +33,15 @@ impl Interactor<GetUserByIdDTO, UserByIdResultDTO> for GetUserById<'_> {
         
         match self.access_service.ensure_can_get_user(
             self.id_provider.is_auth(),
-            self.id_provider.user_id(),
-            &data.id,
-            self.id_provider.user_state(),
-            &self.id_provider.permissions()
+            self.id_provider.permissions()
         ) {
             Ok(_) => (),
             Err(error) => match error {
                 DomainError::AccessDenied => return Err(
-                    ApplicationError::Forbidden(
-                        ErrorContent::Message(error.to_string())
-                    )
+                    ApplicationError::Forbidden(ErrorContent::from(error))
                 ),
                 DomainError::AuthorizationRequired => return Err(
-                    ApplicationError::Unauthorized(
-                        ErrorContent::Message(error.to_string())
-                    )
+                    ApplicationError::Unauthorized(ErrorContent::from(error))
                 )
             }
         };
@@ -56,9 +49,7 @@ impl Interactor<GetUserByIdDTO, UserByIdResultDTO> for GetUserById<'_> {
         let user = match self.user_reader.get_user(&data.id).await {
             Some(u) => u,
             None => return Err(
-                ApplicationError::NotFound(
-                    ErrorContent::Message("User not found".to_string())
-                )
+                ApplicationError::NotFound(ErrorContent::from("User not found"))
             ),
         };
 

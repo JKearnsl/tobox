@@ -31,7 +31,7 @@ pub type RoleRangeResultDTO = Vec<RoleItemResult>;
 
 
 pub struct GetRoleRange<'a> {
-    pub role_gateway: &'a dyn RoleReader,
+    pub role_reader: &'a dyn RoleReader,
     pub id_provider: Box<dyn IdProvider>,
     pub access_service: &'a AccessService,
     pub validator: &'a ValidatorService,
@@ -42,20 +42,15 @@ impl Interactor<RoleRangeDTO, RoleRangeResultDTO> for GetRoleRange<'_> {
         
         match self.access_service.ensure_can_get_role(
             self.id_provider.is_auth(),
-            self.id_provider.user_state(),
             self.id_provider.permissions()
         ) {
             Ok(_) => (),
             Err(error) => return match error {
                 DomainError::AccessDenied => Err(
-                    ApplicationError::Forbidden(
-                        ErrorContent::Message(error.to_string())
-                    )
+                    ApplicationError::Forbidden(ErrorContent::from(error))
                 ),
                 DomainError::AuthorizationRequired => Err(
-                    ApplicationError::Unauthorized(
-                        ErrorContent::Message(error.to_string())
-                    )
+                    ApplicationError::Unauthorized(ErrorContent::from(error))
                 )
             }
         }
@@ -72,13 +67,13 @@ impl Interactor<RoleRangeDTO, RoleRangeResultDTO> for GetRoleRange<'_> {
         if !validator_err_map.is_empty() {
             return Err(
                 ApplicationError::InvalidData(
-                    ErrorContent::Map(validator_err_map)
+                    ErrorContent::from(validator_err_map)
                 )
             )
         }
         
         
-        let roles = self.role_gateway.get_roles_range(
+        let roles = self.role_reader.get_roles_range(
             &data.per_page,
             &(data.page * data.per_page)
         ).await;

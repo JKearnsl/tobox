@@ -43,3 +43,4 @@ sqlx = { version = "^0.8", features = [
     "sqlx-sqlite",
     "chrono"
 ] }
+rand = "0.8.5"

@@ -357,8 +357,13 @@ impl AccessService {
 
     pub fn ensure_can_get_permissions(
         &self,
+        is_auth: &bool,
         permissions: &Vec<String>
     ) -> Result<(), DomainError> {
+        
+        if !is_auth {
+            return Err(DomainError::AuthorizationRequired)
+        }
 
         if permissions.contains(&PermissionTag::GetPermission.to_string()) {
             return Ok(())

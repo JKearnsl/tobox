@@ -8,7 +8,7 @@ pub struct Permission {
     pub tag: PermissionTag,
 }
 
-#[derive(Display, Debug)]
+#[derive(Display, Debug, Clone)]
 pub enum PermissionTag {
     GetUserSelf,
     GetUser,

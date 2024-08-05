@@ -49,3 +49,38 @@ pub enum PermissionTag {
     #[strum(serialize = "DeleteSpecificObject({0})")]
     DeleteSpecificObject(BoxId)
 }
+
+
+impl PermissionTag {
+    pub fn static_tags() -> Vec<PermissionTag> {
+        vec![
+            PermissionTag::GetUser,
+            PermissionTag::CreateUser,
+            PermissionTag::DeleteUser,
+            PermissionTag::CreateSession,
+            PermissionTag::DeleteSession,
+            PermissionTag::GetRole,
+            PermissionTag::CreateRole,
+            PermissionTag::UpdateRole,
+            PermissionTag::DeleteRole,
+            PermissionTag::SetDefaultRole,
+            PermissionTag::LinkUserRole,
+            PermissionTag::GetUserRole,
+            PermissionTag::GetPermission,
+            PermissionTag::LinkRolePermission,
+            PermissionTag::GetBox,
+            PermissionTag::CreateBox,
+            PermissionTag::DeleteBox,
+            PermissionTag::GetObject,
+            PermissionTag::CreateObject,
+            PermissionTag::UpdateObject,
+            PermissionTag::DeleteObject
+        ]
+    }
+    
+    pub fn guest_tags() -> Vec<PermissionTag> {
+        vec![
+            PermissionTag::CreateSession,
+        ]
+    }
+}

@@ -43,20 +43,15 @@ impl Interactor<UpdateRoleDTO, RoleResultDTO> for UpdateRole<'_> {
         
         match self.access_service.ensure_can_update_role(
             self.id_provider.is_auth(),
-            self.id_provider.user_state(),
             self.id_provider.permissions()
         ) {
             Ok(_) => (),
             Err(error) => return match error {
                 DomainError::AccessDenied => Err(
-                    ApplicationError::Forbidden(
-                        ErrorContent::Message(error.to_string())
-                    )
+                    ApplicationError::Forbidden(ErrorContent::from(error))
                 ),
                 DomainError::AuthorizationRequired => Err(
-                    ApplicationError::Unauthorized(
-                        ErrorContent::Message(error.to_string())
-                    )
+                    ApplicationError::Unauthorized(ErrorContent::from(error))
                 )
             }
         };
@@ -77,7 +72,7 @@ impl Interactor<UpdateRoleDTO, RoleResultDTO> for UpdateRole<'_> {
         if !validator_err_map.is_empty() {
             return Err(
                 ApplicationError::InvalidData(
-                    ErrorContent::Map(validator_err_map)
+                    ErrorContent::from(validator_err_map)
                 )
             )
         }
@@ -86,7 +81,7 @@ impl Interactor<UpdateRoleDTO, RoleResultDTO> for UpdateRole<'_> {
             Some(role) => role,
             None => return Err(
                 ApplicationError::InvalidData(
-                    ErrorContent::Message("Role not found".to_string())
+                    ErrorContent::from("Role not found")
                 )
             )
         };
@@ -97,25 +92,19 @@ impl Interactor<UpdateRoleDTO, RoleResultDTO> for UpdateRole<'_> {
         // further operations to resolve them.
         self.role_gateway.get_role_by_title_not_sensitive(&data.title).await.ok_or_else(
             || ApplicationError::InvalidData(
-                ErrorContent::Map(
-                    [("title".to_string(), "Role with this title already exists".to_string())]
-                    .iter().cloned().collect()
+                ErrorContent::from([(
+                    "title".to_string(), 
+                    "Role with this title already exists".to_string()
+                )].iter().cloned().collect::<HashMap<String, String>>()
                 )
             )
         )?;
         
-        let new_role = match self.role_service.update_role(
+        let new_role = self.role_service.update_role(
             old_role,
             data.title,
             data.description
-        ) {
-            Ok(role) => role,
-            Err(error) => return Err(
-                ApplicationError::InvalidData(
-                    ErrorContent::Message(error.to_string())
-                )
-            )
-        };
+        );
         
         self.role_gateway.save_role(&new_role).await;
         

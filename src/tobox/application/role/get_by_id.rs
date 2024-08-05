@@ -35,20 +35,15 @@ impl Interactor<GetRoleByIdDTO, RoleByIdResultDTO> for GetRoleById<'_> {
         
         match self.access_service.ensure_can_get_role(
             self.id_provider.is_auth(),
-            self.id_provider.user_state(),
             self.id_provider.permissions()
         ) {
             Ok(_) => (),
             Err(error) => return match error {
                 DomainError::AccessDenied => Err(
-                    ApplicationError::Forbidden(
-                        ErrorContent::Message(error.to_string())
-                    )
+                    ApplicationError::Forbidden(ErrorContent::from(error))
                 ),
                 DomainError::AuthorizationRequired => Err(
-                    ApplicationError::Unauthorized(
-                        ErrorContent::Message(error.to_string())
-                    )
+                    ApplicationError::Unauthorized(ErrorContent::from(error))
                 )
             }
         };
@@ -56,9 +51,7 @@ impl Interactor<GetRoleByIdDTO, RoleByIdResultDTO> for GetRoleById<'_> {
         let role = match self.role_reader.get_role(&data.id).await {
             Some(role) => role,
             None => return Err(
-                ApplicationError::InvalidData(
-                    ErrorContent::Message("Role not found".to_string())
-                )
+                ApplicationError::InvalidData(ErrorContent::from("Role not found"))
             )
         };
         

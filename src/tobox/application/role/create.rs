@@ -50,20 +50,15 @@ impl Interactor<CreateRoleDTO, CreateRoleResultDTO> for CreateRole<'_> {
         
         match self.access_service.ensure_can_create_role(
             self.id_provider.is_auth(),
-            self.id_provider.user_state(),
             self.id_provider.permissions()
         ) {
             Ok(_) => (),
             Err(error) => return match error {
                 DomainError::AccessDenied => Err(
-                    ApplicationError::Forbidden(
-                        ErrorContent::Message(error.to_string())
-                    )
+                    ApplicationError::Forbidden(ErrorContent::from(error))
                 ),
                 DomainError::AuthorizationRequired => Err(
-                    ApplicationError::Unauthorized(
-                        ErrorContent::Message(error.to_string())
-                    )
+                    ApplicationError::Unauthorized(ErrorContent::from(error))
                 )
             }
         };
@@ -85,7 +80,7 @@ impl Interactor<CreateRoleDTO, CreateRoleResultDTO> for CreateRole<'_> {
         if !validator_err_map.is_empty() {
             return Err(
                 ApplicationError::InvalidData(
-                    ErrorContent::Map(validator_err_map)
+                    ErrorContent::from(validator_err_map)
                 )
             )
         }
@@ -122,7 +117,7 @@ impl Interactor<CreateRoleDTO, CreateRoleResultDTO> for CreateRole<'_> {
                 );
                 return Err(
                     ApplicationError::InvalidData(
-                        ErrorContent::Map(validator_err_map)
+                        ErrorContent::from(validator_err_map)
                     )
                 )
             }

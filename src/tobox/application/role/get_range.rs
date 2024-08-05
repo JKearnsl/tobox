@@ -67,7 +67,7 @@ impl Interactor<RoleRangeDTO, RoleRangeResultDTO> for GetRoleRange<'_> {
         if !validator_err_map.is_empty() {
             return Err(
                 ApplicationError::InvalidData(
-                    ErrorContent::Map(validator_err_map)
+                    ErrorContent::from(validator_err_map)
                 )
             )
         }

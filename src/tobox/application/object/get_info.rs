@@ -32,7 +32,6 @@ pub struct GetObjectInfoResultDTO {
 
 pub struct GetObjectInfo<'a> {  
     pub object_reader: &'a dyn ObjectReader,
-    pub file_storage_reader: &'a dyn FileStorageReader,
     pub access_service: &'a AccessService,
     pub id_provider: Box<dyn IdProvider>
 }

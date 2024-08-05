@@ -27,29 +27,22 @@ impl Interactor<UserId, Vec<PermissionItemResult>> for GetUserPermissions<'_> {
     async fn execute(&self, data: UserId) -> Result<Vec<PermissionItemResult>, ApplicationError> {
         
         match self.access_service.ensure_can_get_permissions(
-            &self.id_provider.permissions()
+            self.id_provider.is_auth(),
+            self.id_provider.permissions()
         ) {
             Ok(_) => (),
             Err(error) => return match error {
                 DomainError::AccessDenied => Err(
-                    ApplicationError::Forbidden(
-                        ErrorContent::Message(error.to_string())
-                    )
+                    ApplicationError::Forbidden(ErrorContent::from(error))
                 ),
                 DomainError::AuthorizationRequired => Err(
-                    ApplicationError::Unauthorized(
-                        ErrorContent::Message(error.to_string())
-                    )
+                    ApplicationError::Unauthorized(ErrorContent::from(error))
                 )
             }
         };
         
-        self.user_reader.get_user_by_id(
-            &data
-        ).await.ok_or(
-            ApplicationError::InvalidData(
-                ErrorContent::Message("User not found".to_string())
-            )
+        self.user_reader.get_user(&data).await.ok_or(
+            ApplicationError::InvalidData(ErrorContent::from("User not found"))
         )?;
         
         let permissions = self.permission_reader.get_user_permissions(

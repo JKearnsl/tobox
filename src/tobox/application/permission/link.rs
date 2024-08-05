@@ -35,14 +35,10 @@ impl Interactor<LinkRolePermissionDTO, ()> for LinkRolePermission<'_> {
             Ok(_) => (),
             Err(error) => return match error {
                 DomainError::AccessDenied => Err(
-                    ApplicationError::Forbidden(
-                        ErrorContent::Message(error.to_string())
-                    )
+                    ApplicationError::Forbidden(ErrorContent::from(error))
                 ),
                 DomainError::AuthorizationRequired => Err(
-                    ApplicationError::Unauthorized(
-                        ErrorContent::Message(error.to_string())
-                    )
+                    ApplicationError::Unauthorized(ErrorContent::from(error))
                 )
             }
         };
@@ -59,15 +55,18 @@ impl Interactor<LinkRolePermissionDTO, ()> for LinkRolePermission<'_> {
         if !validator_err_map.is_empty() {
             return Err(
                 ApplicationError::InvalidData(
-                    ErrorContent::Map(validator_err_map)
+                    ErrorContent::from(validator_err_map)
                 )
             )
         }
         
-        if self.permission_gateway.is_permission_linked_to_role(&data.role_id, &data.permission_id).await {
+        if self.permission_gateway.is_permission_linked_to_role(
+            &data.role_id, 
+            &data.permission_id
+        ).await {
             return Err(
                 ApplicationError::InvalidData(
-                    ErrorContent::Message("Permission already linked to role".to_string())
+                    ErrorContent::from("Permission already linked to role")
                 )
             )
         }

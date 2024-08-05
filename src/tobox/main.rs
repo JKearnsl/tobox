@@ -12,7 +12,7 @@ mod application;
 mod adapters;
 mod node;
 mod panel;
-
+mod ioc;
 
 fn main() -> std::io::Result<()> {
     let config = config::ConfigManager::from_file("config.yaml");
@@ -50,7 +50,6 @@ fn main() -> std::io::Result<()> {
         if let Some(node_config) = &config.get().node {
             let mut server = NodeServer::new(
                 env!("CARGO_PKG_VERSION"),
-                node_config.is_intermediate,
                 config
             );
             if let Some(tls) = &node_config.tls {

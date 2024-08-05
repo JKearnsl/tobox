@@ -42,7 +42,7 @@ pub struct CreateSession<'a> {
 
 impl Interactor<CreateSessionDTO, CreateSessionResultDTO> for CreateSession<'_> {
     async fn execute(
-        &self, 
+        &self,
         data: CreateSessionDTO
     ) -> Result<CreateSessionResultDTO, ApplicationError> {
         
@@ -51,10 +51,8 @@ impl Interactor<CreateSessionDTO, CreateSessionResultDTO> for CreateSession<'_> 
             self.id_provider.permissions()
         ) {
             Ok(_) => (),
-            Err(e) => return Err(
-                ApplicationError::Forbidden(
-                    ErrorContent::Message(e.to_string())
-                )
+            Err(error) => return Err(
+                ApplicationError::Forbidden(ErrorContent::from(error))
             )
         };
 
@@ -71,7 +69,7 @@ impl Interactor<CreateSessionDTO, CreateSessionResultDTO> for CreateSession<'_> 
         if !validator_err_map.is_empty() {
             return Err(
                 ApplicationError::InvalidData(
-                    ErrorContent::Message("Invalid username and password pair")
+                    ErrorContent::from("Invalid username and password pair")
                 )
             )
         }
@@ -80,34 +78,34 @@ impl Interactor<CreateSessionDTO, CreateSessionResultDTO> for CreateSession<'_> 
             Some(user) => user,
             None => return Err(
                 ApplicationError::InvalidData(
-                    ErrorContent::Message("Invalid username and password pair")
+                    ErrorContent::from("Invalid username and password pair")
                 )
             )
         };
-        
-        if !self.password_hasher.verify(data.password, user.hashed_password).await {
+
+        if !self.password_hasher.verify(&data.password, &user.hashed_password).await {
             return Err(
                 ApplicationError::InvalidData(
-                    ErrorContent::Message("Invalid username and password pair")
+                    ErrorContent::from("Invalid username and password pair")
                 )
             )
         }
-        
+
         let permissions = self.permission_reader.get_user_permissions(
             &user.id
         ).await;
-        
+
         let session = self.session_service.create_session(
             user.id.clone(),
-            permissions.iter().map(|p| p.tag).collect()
+            permissions.iter().map(|p| p.tag.clone()).collect()
         );
-        
-        self.session_writer.write_session(session.clone()).await;
+
+        self.session_writer.save_session(&session).await;
 
         Ok(CreateSessionResultDTO {
             token: session.token,
             user_id: user.id,
-            permissions: permissions.iter().map(|p| p.tag).collect(),
+            permissions: permissions.iter().map(|p| p.tag.to_string()).collect(),
             expires_at: session.expires_at
         })
     }

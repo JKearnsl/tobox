@@ -13,7 +13,7 @@ use crate::domain::services::access::AccessService;
 use crate::domain::services::validator::ValidatorService;
 
 #[derive(Debug, Deserialize)]
-pub struct GetBoxListDTO {
+pub struct GetBoxRangeDTO {
     pub page: Option<u64>,
     pub per_page: Option<u64>,
 }
@@ -24,17 +24,17 @@ pub struct BoxItem {
     pub created_at: DateTime<Utc>,
 }
 
-pub type GetBoxListResultDTO = Vec<BoxItem>;
+pub type GetBoxRangeResultDTO = Vec<BoxItem>;
 
-pub struct GetBoxList<'a> {
+pub struct GetBoxRange<'a> {
     pub box_reader: &'a dyn BoxReader,
     pub validator: &'a ValidatorService,
     pub access_service: &'a AccessService,
     pub id_provider: Box<dyn IdProvider>,
 }
 
-impl Interactor<GetBoxListDTO, GetBoxListResultDTO> for GetBoxList<'_> {
-    async fn execute(&self, data: GetBoxListDTO) -> Result<GetBoxListResultDTO, ApplicationError> {
+impl Interactor<GetBoxRangeDTO, GetBoxRangeResultDTO> for GetBoxRange<'_> {
+    async fn execute(&self, data: GetBoxRangeDTO) -> Result<GetBoxRangeResultDTO, ApplicationError> {
 
         match self.access_service.ensure_can_get_box(
             self.id_provider.is_auth(),

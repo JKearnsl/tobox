@@ -15,7 +15,10 @@ mod panel;
 mod ioc;
 
 fn main() -> std::io::Result<()> {
-    let config = config::ConfigManager::from_file("config.yaml");
+    const VERSION: &str = env!("CARGO_PKG_VERSION");
+    const CONFIG_PATH: &str = "config.yaml";
+    
+    let config = config::ConfigManager::from_file(CONFIG_PATH);
     if let Some(log_level) = &config.get().log_level {
         env_logger::builder()
             .filter_level(log::LevelFilter::from_str(log_level).unwrap())
@@ -48,10 +51,7 @@ fn main() -> std::io::Result<()> {
         }
 
         if let Some(node_config) = &config.get().node {
-            let mut server = NodeServer::new(
-                env!("CARGO_PKG_VERSION"),
-                config
-            );
+            let mut server = NodeServer::new(VERSION, CONFIG_PATH);
             if let Some(tls) = &node_config.tls {
                 server = server.set_tls(&tls.key, &tls.cert);
             }

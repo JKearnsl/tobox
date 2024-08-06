@@ -13,7 +13,6 @@ use crate::application::r#box::get_range::GetBoxRange;
 use crate::application::role::create::CreateRole;
 use crate::application::role::delete::DeleteRole;
 use crate::application::role::get_by_id::GetRoleById;
-use crate::application::role::get_by_ids::GetRolesByIds;
 use crate::application::role::get_by_user::GetUserRoles;
 use crate::application::role::get_default::GetDefaultRole;
 use crate::application::role::get_range::GetRoleRange;
@@ -40,7 +39,6 @@ pub trait InteractorFactory {
     
     fn create_role(&self, id_provider: Box<dyn IdProvider>) -> CreateRole;
     fn get_role_by_id(&self, id_provider: Box<dyn IdProvider>) -> GetRoleById;
-    fn get_roles_by_ids(&self, id_provider: Box<dyn IdProvider>) -> GetRolesByIds;
     fn get_role_by_user(&self, id_provider: Box<dyn IdProvider>) -> GetUserRoles;
     fn get_role_range(&self, id_provider: Box<dyn IdProvider>) -> GetRoleRange;
     fn set_default_role(&self, id_provider: Box<dyn IdProvider>) -> SetDefaultRole;

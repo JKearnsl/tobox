@@ -50,7 +50,7 @@ impl ValidatorService {
         let role_title_max_length = 64;
         let role_title_min_length = 4;
         
-        let role_description_max_length = 255;
+        let role_description_max_length = 256;
         let role_description_min_length = 4;
         
         ValidatorService {

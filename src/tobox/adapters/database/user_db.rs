@@ -42,7 +42,7 @@ impl UserReader for UserGateway {
             .bind(user_ids)
             .fetch_all(&self.db).await?;
         
-        if rows.is_empty() {
+        if rows.len() != user_ids.len() {
             None
         } else {
             Some(rows.into_iter().map(|row| map_user_model_to_domain(row)).collect())

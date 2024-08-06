@@ -10,7 +10,7 @@ pub struct DefaultRole {
 impl CreateIFNotExists for DefaultRole {
     async fn create_if_not_exists(&self, db_pool: DbPool) -> Result<(), sqlx::Error> {
         sqlx::query(
-            "CREATE TABLE IF NOT EXISTS default_role (id VARCHAR(16) PRIMARY KEY);")
+            "CREATE TABLE IF NOT EXISTS default_role (id CHAR(16) PRIMARY KEY);")
         .execute(&db_pool)
         .await?;
         Ok(())

@@ -12,7 +12,7 @@ pub struct RoleUser {
 impl CreateIFNotExists for RoleUser {
     async fn create_if_not_exists(&self, db_pool: DbPool) -> Result<(), sqlx::Error> {
         sqlx::query(
-            "CREATE TABLE IF NOT EXISTS role_user (
+            "CREATE TABLE IF NOT EXISTS role_users (
                 role_id CHAR(16) NOT NULL REFERENCES roles(id), 
                 user_id CHAR(16) NOT NULL REFERENCES users(id), 
                 PRIMARY KEY (role_id, user_id)

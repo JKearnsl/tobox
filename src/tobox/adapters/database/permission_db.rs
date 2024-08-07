@@ -152,7 +152,7 @@ impl PermissionWriter for PermissionGateway {
 
 #[async_trait]
 impl PermissionRemover for PermissionGateway {
-    async fn remove_permission(&self, permission_id: PermissionId) {
+    async fn remove_permission(&self, permission_id: &PermissionId) {
         sqlx::query("DELETE FROM permissions WHERE id = $1")
             .bind(permission_id)
             .execute(&*self.db)

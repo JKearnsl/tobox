@@ -22,7 +22,7 @@ pub trait PermissionWriter {
 
 #[async_trait]
 pub trait PermissionRemover {
-    async fn remove_permission(&self, permission_id: PermissionId );
+    async fn remove_permission(&self, permission_id: &PermissionId );
 }
 
 #[async_trait]

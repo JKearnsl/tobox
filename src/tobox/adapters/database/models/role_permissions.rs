@@ -14,7 +14,7 @@ impl CreateIFNotExists for RolePermission {
         sqlx::query(
             "CREATE TABLE IF NOT EXISTS role_permissions (
                 role_id CHAR(16) NOT NULL REFERENCES roles(id), 
-                permission_id INTEGER NOT NULL REFERENCES permissions(id), 
+                permission_id CHAR(16) NOT NULL REFERENCES permissions(id), 
                 PRIMARY KEY (role_id, permission_id)
             );")
             .execute(&db_pool)

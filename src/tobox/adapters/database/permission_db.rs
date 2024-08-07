@@ -49,10 +49,7 @@ impl PermissionReader for PermissionGateway {
     async fn get_permissions(&self, permission_ids: &Vec<PermissionId>) -> Option<Vec<PermissionDomain>> {
         let permissions: Vec<Permission> = sqlx::query_as(
             "SELECT * FROM permissions WHERE id = ANY($1)"
-        ).bind(permission_ids.iter().map(
-            |el| el.clone() as i64)
-            .collect()
-        ).fetch_all(&self.db).await?;
+        ).bind(permission_ids).fetch_all(&self.db).await?;
         
         if permissions.len() != permission_ids.len() {
             return None
@@ -138,7 +135,7 @@ impl PermissionWriter for PermissionGateway {
         sqlx::query(
             "INSERT INTO permissions (id, tag) VALUES ($1, $2) 
             ON CONFLICT (id) DO UPDATE SET tag = $2"
-        ).bind(data.id).bind(data.tag.to_string()).execute(&*self.db).await.unwrap();
+        ).bind(&data.id).bind(data.tag.to_string()).execute(&*self.db).await.unwrap();
     }
 
     async fn save_permissions(&self, data: &Vec<PermissionDomain>) {
@@ -147,7 +144,7 @@ impl PermissionWriter for PermissionGateway {
             ON CONFLICT (id) DO UPDATE SET tag = EXCLUDED.tag"
         );
         for permission in data.iter() {
-            query = query.bind(permission.id).bind(permission.tag.to_string());
+            query = query.bind(&permission.id).bind(permission.tag.to_string());
         }
         query.execute(&*self.db).await.unwrap();
     }

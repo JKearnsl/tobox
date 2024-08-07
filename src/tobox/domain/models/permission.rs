@@ -1,4 +1,4 @@
-use strum_macros::Display;
+use strum_macros::{Display, EnumString};
 use crate::domain::models::r#box::BoxId;
 
 pub type PermissionId = String;
@@ -8,7 +8,7 @@ pub struct Permission {
     pub tag: PermissionTag,
 }
 
-#[derive(Display, Debug, Clone)]
+#[derive(Display, Debug, Clone, EnumString)]
 pub enum PermissionTag {
     GetUser,
     CreateUser,
@@ -50,6 +50,11 @@ pub enum PermissionTag {
     DeleteSpecificObject(BoxId)
 }
 
+impl From<String> for PermissionTag {
+    fn from(s: String) -> Self {
+        s.parse::<PermissionTag>().unwrap()
+    }
+} 
 
 impl PermissionTag {
     pub fn static_tags() -> Vec<PermissionTag> {

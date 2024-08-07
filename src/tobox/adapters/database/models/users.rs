@@ -1,10 +1,11 @@
 use chrono::{DateTime, Utc};
 use crate::adapters::database::models::CreateIFNotExists;
 use crate::adapters::database::pool::DbPool;
+use crate::domain::models::user::UserId;
 
 #[derive(sqlx::FromRow, Debug, PartialEq, Eq)]
 pub struct User {
-    pub id: String,
+    pub id: UserId,
     pub username: String,
     pub hashed_password: String,
     pub created_at: DateTime<Utc>,

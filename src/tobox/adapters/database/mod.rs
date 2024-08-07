@@ -5,3 +5,5 @@ pub mod permission_db;
 pub mod init_state_db;
 pub mod file_storage;
 pub mod pool;
+pub mod box_db;
+pub mod object_db;

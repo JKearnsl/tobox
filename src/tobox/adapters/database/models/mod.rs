@@ -7,6 +7,8 @@ pub mod roles;
 pub mod users;
 pub mod default_role;
 pub mod init_state;
+pub mod boxes;
+pub mod objects;
 
 pub trait CreateIFNotExists {
     async fn create_if_not_exists(&self, db_pool: DbPool) -> Result<(), sqlx::Error>;
